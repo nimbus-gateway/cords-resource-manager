@@ -1,0 +1,4 @@
+flask
+dynaconf
+tinydb=4.8.0
+apifairy=1.4.0
