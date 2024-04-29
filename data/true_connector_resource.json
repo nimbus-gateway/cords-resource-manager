@@ -1,0 +1,107 @@
+{
+    "@context": {
+        "ids": "https://w3id.org/idsa/core/",
+        "idsc": "https://w3id.org/idsa/code/",
+        "cords": "https://www.cords.ie/ontologies/cordsml"
+    },
+    "@type": "ids:DataResource",
+    "@id": "https://w3id.org/idsa/autogen/textResource/cords_{{$guid}}",
+    "ids:language": [
+        {
+            "@id": "https://w3id.org/idsa/code/EN"
+        }
+    ],
+    "ids:version": "1.0.0",
+    "ids:keyword": [
+    ],
+    "ids:contentType": {
+        "@id": "https://w3id.org/idsa/code/SCHEMA_DEFINITION"
+    },
+    "ids:description": [
+        {
+            "@value": "A Model Sharing Service: Energy Forecasting",
+            "@type": "http://www.w3.org/2001/XMLSchema#string"
+        }
+    ],
+    "ids:created": {
+        "@value": "{{$isoTimestamp}}",
+        "@type": "http://www.w3.org/2001/XMLSchema#dateTimeStamp"
+    },
+    "ids:theme": [],
+    "ids:contractOffer": [
+        {
+            "@type": "ids:ContractOffer",
+            "@id": "https://w3id.org/idsa/autogen/contractOffer/{{$guid}}",
+            "ids:permission": [
+                {
+                    "@type": "ids:Permission",
+                    "@id": "https://w3id.org/idsa/autogen/permission/{{$guid}}",
+                    "ids:target": {
+                        "@id": "http://w3id.org/engrd/connector/artifact/cords/voc"
+                    },
+                    "ids:description": [
+                        {
+                            "@value": "provide-access",
+                            "@type": "http://www.w3.org/2001/XMLSchema#string"
+                        }
+                    ],
+                    "ids:action": [
+                        {
+                            "@id": "https://w3id.org/idsa/code/USE"
+                        }
+                    ],
+                    "ids:title": [
+                        {
+                            "@value": "Example Usage Policy POSTMAN",
+                            "@type": "http://www.w3.org/2001/XMLSchema#string"
+                        }
+                    ]
+                }
+            ],
+            "ids:provider": {
+                "@id": "https://w3id.org/engrd/connector/"
+            },
+            "ids:contractStart": {
+                "@value": "{{$isoTimestamp}}",
+                "@type": "http://www.w3.org/2001/XMLSchema#dateTimeStamp"
+            },
+            "ids:contractDate": {
+                "@value": "{{$isoTimestamp}}",
+                "@type": "http://www.w3.org/2001/XMLSchema#dateTimeStamp"
+            }
+        }
+    ],
+    "ids:representation": [
+        {
+            "@type": "ids:SoftwareRepresentation",
+            "@id": "https://w3id.org/idsa/autogen/textRepresentation/{{$guid}}",
+            "ids:instance": [
+                {
+                    "@type": "ids:Artifact",
+                    "@id": "http://w3id.org/engrd/connector/artifact/cords/voc",
+                    "ids:creationDate": {
+                        "@value": "{{$isoTimestamp}}",
+                        "@type": "http://www.w3.org/2001/XMLSchema#dateTimeStamp"
+                    }
+                }
+            ],
+            "ids:language": {
+                "@id": "https://w3id.org/idsa/code/EN"
+            },
+            "ids:created": {
+                "@value": "{{$isoTimestamp}}",
+                "@type": "http://www.w3.org/2001/XMLSchema#dateTimeStamp"
+            }
+        }
+    ],
+    "ids:title": [
+        {
+            "@value": "CORDS Energy Forecasting Service",
+            "@type": "http://www.w3.org/2001/XMLSchema#string"
+        }
+    ],
+    "ids:modified": {
+        "@value": "{{$isoTimestamp}}",
+        "@type": "http://www.w3.org/2001/XMLSchema#dateTimeStamp"
+    }
+}

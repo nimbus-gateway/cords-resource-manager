@@ -6,15 +6,16 @@ import hashlib
 import json
 from datetime import datetime
 from marshmallow import Schema, fields
+from cords_semantics.semantics import MlSemanticManager
+from cords_semantics.mlflow import convert_tags_to_dictionary, extract_mlflow_semantics
+import mlflow
+import logging
+from config import settings
 
-class ErrorReponseSchema(ma.Schema):
-    """Schema defining the attributes when creating a new model entry."""
-    status = ma.String(required=True)
-    message = ma.String(required=True)
-    error = ma.String(required=True)
+logging.basicConfig(level=logging.DEBUG)  
 
 class MLSemanticSchema(ma.Schema):
-    """Schema defining the sematnic of a registeed ML Model."""
+    """Schema defining the semantics of a registeed ML Model."""
     model_id = ma.String(required=True)
     semantics = ma.List(fields.Dict(), required=True)
 
@@ -33,6 +34,7 @@ class MLModelSchema(ma.Schema):
     version = ma.String(required=True)
     description = ma.String(required=True)
     ml_flow_model_path = ma.String(required=True)
+
 
 class MlModel():
     def __init__(self, db_path='src/db/db.json'):
@@ -146,4 +148,28 @@ class MlModel():
         if regex.fullmatch(input_string):
             return True
         else:
+            return False
+        
+    def generate_semantics(self, model_id):
+        try:
+            mlflow.set_tracking_uri(settings.MLFLOW_URI)
+            semantic_manager = MlSemanticManager('data/cordsml.rdf')
+            
+            ml_flow_run_id = self.get_mlflow_run_id(model_id)
+            logging.info("run id retrieved :%s", ml_flow_run_id)
+            mflow_tags = extract_mlflow_semantics(ml_flow_run_id)
+            logging.info("tags extracted from mlflow: %s", str(mflow_tags))
+
+            mlflow_semantics_dictionary = convert_tags_to_dictionary(mflow_tags)
+            logging.info("semantic in a dictionary: %s ", str(mlflow_semantics_dictionary))
+
+            semantic_graph = semantic_manager.create_model_semantics(mlflow_semantics_dictionary)
+            jsonld_output_string = semantic_graph.serialize(format='json-ld')
+
+            jsonld_output = json.loads(jsonld_output_string)
+
+            return jsonld_output
+
+        except Exception as e:
+            logging.error("Error Occured During Semantic Generation %s",str(e))
             return False

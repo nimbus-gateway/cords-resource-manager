@@ -1,11 +1,13 @@
 from flask import request, Response, json, Blueprint, jsonify, abort
-from src.models.ml_model import MlModel, MLModelSchema, ErrorReponseSchema, MLModelSchemaResponse, MLSemanticSchema
+from src.models.ml_model import MlModel, MLModelSchema, MLModelSchemaResponse, MLSemanticSchema
+from src.models.error_model import ErrorReponseSchema
 from apifairy import body, other_responses, response
 from cords_semantics.semantics import MlSemanticManager
 from cords_semantics.mlflow import convert_tags_to_dictionary, extract_mlflow_semantics
+import mlflow
 import logging
 from config import settings
-import mlflow
+
 
 
 logging.basicConfig(level=logging.DEBUG)  
@@ -108,7 +110,7 @@ def update_model(kwargs, model_id):
 @ml_models.route('/generate_semantics/<string:model_id>', methods = ["GET"])
 @response(ml_semantic_schema)
 def generate_semantics(model_id):
-    """Getting semantic description"""
+    """Generate semantic description"""
     try:
         mlflow.set_tracking_uri(settings.MLFLOW_URI)
         semantic_manager = MlSemanticManager('data/cordsml.rdf')
@@ -119,7 +121,7 @@ def generate_semantics(model_id):
         logging.info("tags extracted from mlflow: %s", str(mflow_tags))
 
         mlflow_semantics_dictionary = convert_tags_to_dictionary(mflow_tags)
-        logging.info("semantic in a dictionary: ", mlflow_semantics_dictionary)
+        logging.info("semantic in a dictionary: %s ", str(mlflow_semantics_dictionary))
 
         semantic_graph = semantic_manager.create_model_semantics(mlflow_semantics_dictionary)
         jsonld_output_string = semantic_graph.serialize(format='json-ld')
