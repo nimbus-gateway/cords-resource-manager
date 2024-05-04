@@ -2,6 +2,7 @@ from apifairy import APIFairy
 from flask import Flask, json
 from flask_marshmallow import Marshmallow
 from config import settings
+from flask_httpauth import HTTPBasicAuth, HTTPTokenAuth  # NEW!!
 
 # -------------
 # Configuration
@@ -12,7 +13,8 @@ from config import settings
 # attached to the Flask application at this point.
 apifairy = APIFairy()
 ma = Marshmallow()
-
+basic_auth = HTTPBasicAuth()  # NEW!!
+token_auth = HTTPTokenAuth()  # NEW!!
 
 # ----------------------------
 # Application Factory Function

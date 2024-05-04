@@ -17,7 +17,7 @@ logging.basicConfig(level=logging.DEBUG)
 class MLSemanticSchema(ma.Schema):
     """Schema defining the semantics of a registeed ML Model."""
     model_id = ma.String(required=True)
-    semantics = ma.List(fields.Dict(), required=True)
+    semantics = fields.Dict(required=True)
 
 class MLModelSchemaResponse(ma.Schema):
     """Schema defining the attributes after creating new model entry."""
@@ -164,9 +164,9 @@ class MlModel():
             logging.info("semantic in a dictionary: %s ", str(mlflow_semantics_dictionary))
 
             semantic_graph = semantic_manager.create_model_semantics(mlflow_semantics_dictionary)
-            jsonld_output_string = semantic_graph.serialize(format='json-ld')
+            jsonld_output = semantic_manager.convert_to_json_ld()
 
-            jsonld_output = json.loads(jsonld_output_string)
+            jsonld_output = jsonld_output
 
             return jsonld_output
 

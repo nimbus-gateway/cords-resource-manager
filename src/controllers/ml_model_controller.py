@@ -1,9 +1,10 @@
 from flask import request, Response, json, Blueprint, jsonify, abort
 from src.models.ml_model import MlModel, MLModelSchema, MLModelSchemaResponse, MLSemanticSchema
 from src.models.error_model import ErrorReponseSchema
-from apifairy import body, other_responses, response
+from apifairy import body, other_responses, response, authenticate
 from cords_semantics.semantics import MlSemanticManager
 from cords_semantics.mlflow import convert_tags_to_dictionary, extract_mlflow_semantics
+from src import basic_auth, token_auth
 import mlflow
 import logging
 from config import settings
@@ -23,6 +24,7 @@ new_model = MlModel()
 
 
 @ml_models.route('/add_model', methods = ["POST"])
+@authenticate(token_auth)
 @response(ml_model_response_schema, 201)
 @other_responses({400: error_response_schema})
 @body(ml_model_schema)
@@ -124,14 +126,15 @@ def generate_semantics(model_id):
         logging.info("semantic in a dictionary: %s ", str(mlflow_semantics_dictionary))
 
         semantic_graph = semantic_manager.create_model_semantics(mlflow_semantics_dictionary)
-        jsonld_output_string = semantic_graph.serialize(format='json-ld')
+        jsonld_output = semantic_manager.convert_to_json_ld()
 
-        jsonld_output = json.loads(jsonld_output_string)
-
-        response = {"model_id": model_id, "semantics": jsonld_output}
+        # jsonld_output = json.loads(jsonld_output_string)
+        print(jsonld_output)
+        resp = {"model_id": model_id, "semantics": jsonld_output}
  
-        return response
+        return resp
     
     except Exception as e:
         error = {"status": "failed", "message": "Error Occured", "error":  str(e)}
+        logging.error(e)
         return error, 500
