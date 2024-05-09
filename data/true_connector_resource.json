@@ -31,11 +31,11 @@
     "ids:contractOffer": [
         {
             "@type": "ids:ContractOffer",
-            "@id": "https://w3id.org/idsa/autogen/contractOffer/{{$guid}}",
+            "@id": "https://w3id.org/idsa/autogen/contractOffer/352ca2a3-9451-43ad-9a2a-0ce565fdb3fd",
             "ids:permission": [
                 {
                     "@type": "ids:Permission",
-                    "@id": "https://w3id.org/idsa/autogen/permission/{{$guid}}",
+                    "@id": "https://w3id.org/idsa/autogen/permission/432ced09-9040-4cd2-9295-49774dc97874",
                     "ids:target": {
                         "@id": "http://w3id.org/engrd/connector/artifact/cords/voc"
                     },
@@ -62,19 +62,19 @@
                 "@id": "https://w3id.org/engrd/connector/"
             },
             "ids:contractStart": {
-                "@value": "{{$isoTimestamp}}",
+                "@value": "2024-03-25T08:34:20.557Z",
                 "@type": "http://www.w3.org/2001/XMLSchema#dateTimeStamp"
             },
             "ids:contractDate": {
-                "@value": "{{$isoTimestamp}}",
+                "@value": "2024-03-25T08:34:20.557Z",
                 "@type": "http://www.w3.org/2001/XMLSchema#dateTimeStamp"
             }
         }
     ],
     "ids:representation": [
         {
-            "@type": "ids:SoftwareRepresentation",
-            "@id": "https://w3id.org/idsa/autogen/textRepresentation/{{$guid}}",
+            "@type": "ids:DataRepresentation",
+            "@id": "https://w3id.org/idsa/autogen/textRepresentation/15c7f65e-1894-4c75-9172-c0d8307886f2",
             "ids:instance": [
                 {
                     "@type": "ids:Artifact",

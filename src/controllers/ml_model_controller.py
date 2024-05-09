@@ -8,7 +8,7 @@ from src import basic_auth, token_auth
 import mlflow
 import logging
 from config import settings
-
+from src import basic_auth, token_auth
 
 
 logging.basicConfig(level=logging.DEBUG)  
@@ -61,6 +61,7 @@ def add_model(kwargs):
 
 @ml_models.route('/get_model/<string:model_id>', methods = ["GET"])
 @response(ml_model_response_schema)
+@authenticate(token_auth)
 @other_responses({404: 'Entry not found'})
 def get_model(model_id):
     """Return a ML Model Entry"""
@@ -77,6 +78,7 @@ def get_model(model_id):
 
 @ml_models.route('/update_model/<string:model_id>', methods=['PUT'])
 @body(ml_model_schema)
+@authenticate(token_auth)
 @response(ml_model_response_schema)
 @other_responses({404: 'Entry not found'})
 def update_model(kwargs, model_id):
@@ -111,6 +113,7 @@ def update_model(kwargs, model_id):
 
 @ml_models.route('/generate_semantics/<string:model_id>', methods = ["GET"])
 @response(ml_semantic_schema)
+@authenticate(token_auth)
 def generate_semantics(model_id):
     """Generate semantic description"""
     try:

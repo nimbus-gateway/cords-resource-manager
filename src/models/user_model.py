@@ -68,8 +68,6 @@ class User():
         self.auth_token_expiration = None
         self.password_hashed = None
 
-        print("creating user")
-
     def is_password_correct(self, email: str, password_plaintext: str):
 
         user = self.get_user(email)

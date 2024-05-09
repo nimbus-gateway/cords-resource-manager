@@ -8,6 +8,11 @@ from datetime import datetime
 from marshmallow import Schema, fields, validate
 from src.connectors.true_connector import TrueConnector
 import logging
+import websockets
+import os
+import asyncio
+import threading
+
 
 from src.models.ml_model import MlModel
 
@@ -86,6 +91,58 @@ class DataSpaceResourceDescriptionSchema(ma.Schema):
     )
 
 
+class ResourceRegistrationPayloadSchema(ma.Schema):
+    """Schema of the payload for registering a data resource."""
+    title = fields.String(
+        required=True, 
+        validate=validate.Length(min=1), 
+        description="Title for the data resource",
+        error_messages={"required": "Resource is required."}
+    )
+    description = fields.String(
+        required=True, 
+        validate=validate.Length(min=1),
+        description="Description of the data resource",
+        error_messages={"required": "Connector name is required."}
+    )
+    keywords = fields.List(
+        cls_or_instance = fields.Str(),
+        required=True, 
+        description="Keywords for describing the data resource",
+        validate=validate.Length(min=1)
+    )
+    catalog_id = fields.String(
+        required=True, 
+        validate=validate.Length(min=1),
+        description="ID of the resource catalog",
+        error_messages={"required": "Catalog id is required."}
+    )
+
+
+
+# Helper function to run asyncio coroutines in the background
+def start_async_task(loop, coro):
+    asyncio.set_event_loop(loop)
+    loop.run_until_complete(coro)
+    
+
+async def send_file(websocket, filename, save_as, chunk_size=512*512):  # 1MB chunks
+    with open(filename, 'rb') as file:
+        while True:
+            chunk = file.read(chunk_size)
+            if not chunk:
+                break
+            # Send each chunk as a separate WebSocket message
+            data_to_send = {"filename": save_as, "content": list(chunk)}
+            await websocket.send(json.dumps(data_to_send))
+        # Send a final message to indicate the end of the file
+        await websocket.send(json.dumps({"filename": save_as, "end": True}))
+
+async def client(filename, save_as):
+    # Establish a WebSocket connection to the specified address
+    async with websockets.connect('ws://localhost:8765') as websocket:
+        # Call the send_file function to send the specified file
+        await send_file(websocket, filename, save_as, 1024)
 
 class DataSpaceResource():
 
@@ -207,7 +264,7 @@ class DataSpaceResource():
 
                 if connector == "trueconnector":
                     try:
-                        true_connector = TrueConnector("url","proxy")
+                        true_connector = TrueConnector()
                         response['resource_description'] = true_connector.create_model_resource_description(resource_id, title, description, keywords, semantics)
                         return response, 200
                     except Exception as e:
@@ -221,4 +278,40 @@ class DataSpaceResource():
         else:
             logging.error("Invalid Resource ID")
             return False, 500
+
+
+    def download_resource(self, resource_id):
+        
+        filename = "test"
+        save_as = "test"
+
+        ResourceQuery = Query()
+    
+        found = self.db.search(ResourceQuery.resource_id == resource_id)
+
+        if found:
+            print(found)
+            resource_type = found[0]['type']
+            if resource_type == 'model':
+                model_id = found[0]['asset_id']
+                _model = model.get_model(model_id)[0]
+                ml_flow_model_path = _model['ml_flow_model_path']
+
+                model.load_model(ml_flow_model_path)
+
+                return True
+
+            return False, 500
+        else:
+            logging.error("Invalid Resource ID")
+            return False, 500
+
+        # loop = asyncio.new_event_loop()
+        # download_thread = threading.Thread(target=start_async_task, args=(loop, client(filename, save_as)))
+        # download_thread.start()
+
+
+
+
+
 

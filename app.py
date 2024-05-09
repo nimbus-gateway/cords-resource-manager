@@ -1,6 +1,7 @@
 from src import create_app
 from config import settings
 
+
 if __name__ == "__main__":
 
     app = create_app()

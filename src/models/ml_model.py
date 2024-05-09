@@ -173,3 +173,14 @@ class MlModel():
         except Exception as e:
             logging.error("Error Occured During Semantic Generation %s",str(e))
             return False
+        
+    def load_model(self, model_path):
+        try:
+            mlflow.set_tracking_uri(settings.MLFLOW_URI)
+
+            loaded_model = mlflow.pyfunc.load_model(model_path)
+
+        except Exception as e:
+            logging.error("Error Occured When Loading Model Locally %s",str(e))
+            return False
+
