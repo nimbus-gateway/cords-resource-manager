@@ -1,6 +1,7 @@
-flask
-dynaconf
-tinydb=4.8.0
-apifairy=1.4.0
-websockets=12.0
-flask_socketio=5.3.6 
+flask==3.0.3
+dynaconf==3.2.5
+tinydb==4.8.0
+apifairy==1.4.0
+websockets==12.0
+asyncio==3.4.3
+mlflow==2.13.0

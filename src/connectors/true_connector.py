@@ -83,8 +83,10 @@ class TrueConnector:
                 template["ids:keyword"].append(keyword_temp)
 
             template["ids:representation"][0]["@id"] = "https://w3id.org/idsa/autogen/dataRepresentation/cords_{0}".format(resource_id)
-            template["ids:representation"][0]["ids:instance"][0]["@id"] = "{0}".format(resource_id)
-            # template["ids:representation"][0]["ids:instance"][0]["@id"]["ids:creationDate"]["@value"] = ""
+            template["ids:representation"][0]["ids:instance"][0]["@id"] = "http://w3id.org/engrd/connector/artifact/{0}".format(resource_id)
+
+            template["ids:contractOffer"][0]["ids:permission"][0]["ids:target"]["@id"] = "http://w3id.org/engrd/connector/artifact/{0}".format(resource_id)
+
 
             template["@context"].update(artifact_semantic["@context"])
             template["cords:mlmetadata"] = artifact_semantic["cords:mlmetadata"]

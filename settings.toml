@@ -3,7 +3,7 @@ SECRET_KEY = "change_this_in_prod"
 HOST = '0.0.0.0'
 PORT= 5000
 ENV = "development"
-MLFLOW_URI = "http://localhost:4000"
+
 
 TRUE_CONNECTOR_TEMPLATE = "data/true_connector_resource.json"
 TRUE_CONNECTOR_PROXY_URL = "https://localhost:8184/proxy"
@@ -11,3 +11,7 @@ TRUE_CONNECTOR_SD_URL = "https://localhost:8090"
 TRUE_CONNECTOR_BROKER_URL = "https://broker-reverseproxy/infrastructure"
 TRUE_CONNECTOR_API_USER_NAME = "apiUser"
 TRUE_CONNECTOR_API_PASSWORD = "password"
+
+
+MLFLOW_URI = "http://mlflow:4000"
+MLFLOW_ARTIFACT_PATH= "/vagrant/mlflow/mlartifacts"

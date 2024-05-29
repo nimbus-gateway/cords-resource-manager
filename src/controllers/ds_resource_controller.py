@@ -1,5 +1,5 @@
 from flask import request, Response, json, Blueprint, jsonify, abort
-from src.models.ds_resource_model import DataSpaceResource, DataSpaceResourceSchema, DataSpaceResourceSchemaResponse, DataSpaceResourceDescriptionSchema
+from src.models.ds_resource_model import DataSpaceResource, DataSpaceResourceSchema, DataSpaceResourceSchemaResponse, DataSpaceResourceDescriptionSchema, ArtifactDownloadResponse
 from src.models.error_model import ErrorReponseSchema
 from apifairy import body, other_responses, response, authenticate
 import logging
@@ -119,55 +119,54 @@ def create_resource_description(resource_id):
         return jsonify(error), 500
 
 
-@ds_resource.route('/download_resource/<resource_id>', methods=["GET"])
+@ds_resource.route('/download_resource/<resource_id>', methods=["POST"])
+@response(ArtifactDownloadResponse)
+@authenticate(token_auth)
 def download_resource(resource_id):
     """Start sending the artifact/resource over a web socket to the consumer"""
     # Start the WebSocket server in a new thread to not block the Flask server
+
+    data = request.get_json()
+    if not data:
+        error = {"status": "failed", "message": "Error Occured", "error": "No data provided"}
+        return error, 400
+
+    # Extract data using kwargs-like unpacking
+    consumer_ip = data.get('consumer_ip')
+    consumer_port = data.get('consumer_port')
    
-    ds_resource_model.download_resource(resource_id)
-    return jsonify({"message": "WebSocket server started for file download", "port": 9999})
+    status = ds_resource_model.download_resource(resource_id, consumer_ip, consumer_port)
+    resp = {"artifact_id": resource_id, "transfer_status": str(status), "message": "WebSocket server started for file download"}
+    logging.debug(resp)
+    return resp
 
 
-@ds_resource.route('/download', methods=["GET"])
+@ds_resource.route('/initiate_download', methods=["POST"])
+@response(ArtifactDownloadResponse)
 def initiate_download():
-    # Create a thread to handle the asynchronous WebSocket connection
+    """Endpoint for IDSA Data App to init downloading"""
+    # Start the WebSocket server in a new thread to not block the Flask server
 
+    data = request.get_json()
+    if not data:
+        error = {"status": "failed", "message": "Error Occured", "error": "No data provided"}
+        return error, 400
 
-    # Define the filename and the save filename here
-    filename = "data/cordsml.rdf"
-    #save_as = "c:\\tmp\\test1.txt"
-    save_as = "cordsml.rdf"
-    
-    # Create a new thread to handle the download process
-    loop = asyncio.new_event_loop()
-    download_thread = threading.Thread(target=start_async_task, args=(loop, client(filename, save_as)))
-    download_thread.start()
+    # Extract data using kwargs-like unpacking
+    artifact_id = data.get('artifact_id')
+    consumer_ip = data.get('consumer_ip')
+    consumer_port = data.get('consumer_port')
 
-    return jsonify({'message': 'Download initiated. Please wait.'})
+    try:
+        resource_id = artifact_id.split('/')[-1]
 
-
-# Helper function to run asyncio coroutines in the background
-def start_async_task(loop, coro):
-    asyncio.set_event_loop(loop)
-    loop.run_until_complete(coro)
-
-
-async def send_file(websocket, filename, save_as, chunk_size=512*512):  # 1MB chunks
-    with open(filename, 'rb') as file:
-        while True:
-            chunk = file.read(chunk_size)
-            if not chunk:
-                break
-            # Send each chunk as a separate WebSocket message
-            data_to_send = {"filename": save_as, "content": list(chunk)}
-            await websocket.send(json.dumps(data_to_send))
-        # Send a final message to indicate the end of the file
-        await websocket.send(json.dumps({"filename": save_as, "end": True}))
-
-async def client(filename, save_as):
-    # Establish a WebSocket connection to the specified address
-    async with websockets.connect('ws://localhost:8765') as websocket:
-        # Call the send_file function to send the specified file
-        await send_file(websocket, filename, save_as, 1024)
-
+    except Exception as e:
+        error = {"status": "failed", "message": "Invalid Artifact ID", "error": str(e)}
+        logging.error("Error occurred %s", error)
+        return jsonify(error), 500
+   
+    status = ds_resource_model.download_resource(resource_id, consumer_ip, consumer_port)
+    resp = {"artifact_id": resource_id, "transfer_status": str(status), "message": "WebSocket server started for file download"}
+    logging.debug(resp)
+    return resp
 

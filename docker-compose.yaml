@@ -1,0 +1,31 @@
+version: '3.8'  # Specify docker-compose version
+
+services:
+  mlflow:
+    image: ghcr.io/mlflow/mlflow:latest  # Use the official MLflow Docker image
+    ports:
+      - 4000:4000  # Expose MLflow UI on port 5000
+    volumes:
+      - ./mlruns:/mlruns  # Mount local directory to store MLflow artifacts and metadata
+    environment:
+      - MLFLOW_TRACKING_URI=http://localhost:4000  # Set the tracking URI to the running container
+      - MLFLOW_S3_ENDPOINT_URL=  # Optional: If using S3 storage, provide the endpoint URL
+      - AWS_ACCESS_KEY_ID=  # Optional: AWS access key (if using S3)
+      - AWS_SECRET_ACCESS_KEY=  # Optional: AWS secret key (if using S3)
+
+    command: mlflow server --host="0.0.0.0" --port="4000"
+
+  cords-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: cords-resource-manager
+    ports:
+      - "5000:5000"
+    volumes:
+      - .:/app
+    environment:
+      FLASK_APP: app.py
+
+
+  

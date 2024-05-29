@@ -8,7 +8,7 @@ from src import basic_auth, token_auth
 import mlflow
 import logging
 from config import settings
-from src import basic_auth, token_auth
+
 
 
 logging.basicConfig(level=logging.DEBUG)  
@@ -60,15 +60,16 @@ def add_model(kwargs):
 
 
 @ml_models.route('/get_model/<string:model_id>', methods = ["GET"])
-@response(ml_model_response_schema)
-@authenticate(token_auth)
+@response(MLModelSchemaResponse)
 @other_responses({404: 'Entry not found'})
+@authenticate(token_auth)
 def get_model(model_id):
     """Return a ML Model Entry"""
 
     model_response = new_model.get_model(model_id)
 
     if model_response:
+        print(model_response)
         return model_response[0]
     else:
         abort(404)

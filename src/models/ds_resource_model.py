@@ -7,12 +7,13 @@ import json
 from datetime import datetime
 from marshmallow import Schema, fields, validate
 from src.connectors.true_connector import TrueConnector
+from config import settings
 import logging
 import websockets
 import os
 import asyncio
 import threading
-
+import zipfile
 
 from src.models.ml_model import MlModel
 
@@ -118,6 +119,32 @@ class ResourceRegistrationPayloadSchema(ma.Schema):
         error_messages={"required": "Catalog id is required."}
     )
 
+class ArtifactDownloadResponse(ma.Schema):
+    """Schema a Data Space Connector."""
+    artifact_id = fields.String(
+        required=True, 
+        description="Identification of the artifact."
+    )
+    transfer_status = fields.String(
+        required=True, 
+        description="Status of the artifact transfer process"
+    )
+    message = fields.String(
+        required=True, 
+        description="Additonal info on artifact download process."
+    )
+
+# Helper function to zip artifiacts
+def zip_folder(folder_path, output_path):
+    # Create a ZipFile object in write mode
+    with zipfile.ZipFile(output_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
+        # Walk through the directory structure
+        for root, dirs, files in os.walk(folder_path):
+            for file in files:
+                # Create the full path to the file
+                file_path = os.path.join(root, file)
+                # Write the file to the zip file, preserving its folder structure
+                zipf.write(file_path, os.path.relpath(file_path, os.path.dirname(folder_path)))
 
 
 # Helper function to run asyncio coroutines in the background
@@ -138,9 +165,9 @@ async def send_file(websocket, filename, save_as, chunk_size=512*512):  # 1MB ch
         # Send a final message to indicate the end of the file
         await websocket.send(json.dumps({"filename": save_as, "end": True}))
 
-async def client(filename, save_as):
+async def client(filename, save_as, sink_ip, port):
     # Establish a WebSocket connection to the specified address
-    async with websockets.connect('ws://localhost:8765') as websocket:
+    async with websockets.connect('ws://{0}:{1}'.format(sink_ip, port)) as websocket:
         # Call the send_file function to send the specified file
         await send_file(websocket, filename, save_as, 1024)
 
@@ -280,10 +307,10 @@ class DataSpaceResource():
             return False, 500
 
 
-    def download_resource(self, resource_id):
+    def download_resource(self, resource_id, sink_ip, port):
         
-        filename = "test"
-        save_as = "test"
+        filename = "artifacts/{0}.zip".format(resource_id)
+        save_as = "{0}.zip".format(resource_id)
 
         ResourceQuery = Query()
     
@@ -297,18 +324,25 @@ class DataSpaceResource():
                 _model = model.get_model(model_id)[0]
                 ml_flow_model_path = _model['ml_flow_model_path']
 
-                model.load_model(ml_flow_model_path)
+                path_list = ml_flow_model_path.split('/')
 
-                return True
+                path = settings.MLFLOW_ARTIFACT_PATH + '/' + path_list[1] + '/' + path_list[2] + '/artifacts'
+
+                zip_folder(path, filename)
+
+                loop = asyncio.new_event_loop()
+                download_thread = threading.Thread(target=start_async_task, args=(loop, client(filename, save_as, sink_ip, port)))
+                download_thread.start()
+                
+                
+                return True, 200
 
             return False, 500
         else:
-            logging.error("Invalid Resource ID")
+            logging.error("Resource Preperation Failed")
             return False, 500
 
-        # loop = asyncio.new_event_loop()
-        # download_thread = threading.Thread(target=start_async_task, args=(loop, client(filename, save_as)))
-        # download_thread.start()
+        
 
 
 

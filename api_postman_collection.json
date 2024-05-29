@@ -1,0 +1,606 @@
+{
+	"info": {
+		"_postman_id": "cc407a98-ab52-4b1c-8f56-8c49a2cee167",
+		"name": "CORDS Model Manager",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "382202"
+	},
+	"item": [
+		{
+			"name": "Register_User",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"email\": \"tharindu.prf@gmail.com\",\r\n    \"password\": \"password123\",\r\n    \"first_name\": \"Tharindu\",\r\n    \"last_name\": \"Ranathunga\",\r\n    \"role\": \"ML Engineer\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:5000/api/users/register",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"users",
+						"register"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get_Auth_Token",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Parse the response body as JSON\r",
+							"var responseData = pm.response.json();\r",
+							"\r",
+							"// Check if the token exists in the response\r",
+							"if (responseData.token) {\r",
+							"    // Set the token as an environment variable\r",
+							"    pm.environment.set(\"token\", responseData.token);\r",
+							"}\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "password",
+							"value": "password123",
+							"type": "string"
+						},
+						{
+							"key": "username",
+							"value": "tharindu.prf@gmail.com",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:5000/api/users/get-auth-token",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"users",
+						"get-auth-token"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Add_Model",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"name\": \"ABC8\",\r\n    \"version\": \"1.0\",\r\n    \"description\": \"This model is a test model\",\r\n    \"ml_flow_model_path\": \"mlflow-artifacts:/332881035548763328/c4e20b0629c14dd2bb46780310f3fbeb/artifacts/knnmodel\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:5000/api/ml_models/add_model",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"ml_models",
+						"add_model"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get_Model",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:5000/api/ml_models/get_model/633db01da42073de86fbe36a35e812c76c4b13e87e0bb3665ac41deaaef55a4f",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"ml_models",
+						"get_model",
+						"633db01da42073de86fbe36a35e812c76c4b13e87e0bb3665ac41deaaef55a4f"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Generate_Semantics",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:5000/api/ml_models/generate_semantics/633db01da42073de86fbe36a35e812c76c4b13e87e0bb3665ac41deaaef55a4f",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"ml_models",
+						"generate_semantics",
+						"633db01da42073de86fbe36a35e812c76c4b13e87e0bb3665ac41deaaef55a4f"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update_Model",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"description\": \"This model is a test model\",\r\n    \"ml_flow_model_path\": \"mlflow-artifacts:/332881035548763328/c4e20b0629c14dd2bb46780310f3fbeb/artifacts/knnmodel\",\r\n    \"name\": \"modelABC6\",\r\n    \"version\": \"1.0\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:5000/api/ml_models/update_model/5a855d1eb692d5cfee0ac64c308b7626cd356e46d36ba4017bcd1332849f6061",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"ml_models",
+						"update_model",
+						"5a855d1eb692d5cfee0ac64c308b7626cd356e46d36ba4017bcd1332849f6061"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Add_Connector",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"id\": \"https://w3id.org/engrd/connector/provider21\",\r\n    \"name\": \"CORDS True Connector\",\r\n    \"type\": \"ids:BaseConnector\",\r\n    \"description\": \"Data Provider Connector description\",\r\n    \"public_key\": \"TUlJREdqQ0NBcCtnQXdJQkFnSUJBVEFLQmdncWhrak9QUVFEQWpCTk1Rc3dDUVlEVlFRR0V3SkZVekVNTUFvR0ExVUVDZ3dEVTFGVE1SQXdEZ1lEVlFRTERBZFVaWE4wVEdGaU1SNHdIQVlEVlFRRERCVlNaV1psY21WdVkyVlVaWE4wWW1Wa1UzVmlRMEV3SGhjTk1qSXhNVEUzTURrMU1qUTRXaGNOTWpVeE1URTJNRGsxTWpRNFdqQkFNUXN3Q1FZRFZRUUdFd0pGVXpFTU1Bb0dBMVVFQ2d3RFUxRlRNUkF3RGdZRFZRUUxEQWRVWlhOMFRHRmlNUkV3RHdZRFZRUUREQWgwWlhOMFltVmtNVENDQVNJd0RRWUpLb1pJaHZjTkFRRUJCUUFEZ2dFUEFEQ0NBUW9DZ2dFQkFLaXFleXVzNlVBK1d0ejJaZ21XUWlJdnhodEJCSnpWeGxCZEVsaUYzaU51cVdaeWNmR3d0N2JKYUlPZks1cC9RYlluRzA0L2ZYM2ZuWDlKSnU3THNsdzJPTFNDWC9ldFUvYnBETjJ6NSswbi9RNVA1cUlTamYxWUNyelBEdHdibE5MY2V1RkF6cmNMYkEzQ3dKMGFBMkM5Rk1PT2t3N25nZnlwZHpYNXpEeFhXSDZTQVl4REtxbHZILytEVmxlYzdPWHBsandBYWUvVFNqdENiaUpsd2YvWm9wcGgxZkZHdkY0MUtKNGJHZWR5NFloaGxhdUZzbjdlL0p2UHdEZnVFeVV6dWxJcDU2SzdhU1Y5bjE4UVVkTWtRWU1ScnhMZ2V0a1krQm1FV2gxK3FLRUdLTGdlY2RHTUdCRjNDVUJ3YXkxeStQd0U4Y05CMkZuMzl3ZFBZQ1VDQXdFQUFhT0JzVENCcmpBTUJnTlZIUk1CQWY4RUFqQUFNQ0FHQTFVZEpRRUIvd1FXTUJRR0NDc0dBUVVGQndNQkJnZ3JCZ0VGQlFjREFqQU9CZ05WSFE4QkFmOEVCQU1DQTZnd0lBWURWUjBPQVFIL0JCWUVGT0xFSkhPaENyRWc1dTUzVzhza21INDVkQ1ZKTUNJR0ExVWRJd0VCL3dRWU1CYUFGRUV3UEg2SHd1OW1jaWVSZ3U5VzZReGNLN3dyTUNZR0ExVWRFUVFmTUIySEJIOEFBQUdDQ21OdmJtNWxZM1J2Y21HQ0NXeHZZMkZzYUc5emREQUtCZ2dxaGtqT1BRUURBZ05wQURCbUFqRUFnYzlTSUhibjFaMjQ4NnY2ZUhZZlVGZGE0c0t5OXZqRm9lZHN1VlRnckprOFZRaHVWbm9Zc0M5Sm9JV1hSdWxsQWpFQWt5TXpkWHVqdDMyREVLY2RMd2w2WFdSb2Vwdjc5MU1lclV3ZCt5TVpuQklHKzZqQ2dRWTkxOHNwZ3dsOCtCaVQ=\",\r\n    \"access_url\": \"https://89.19.88.88:8449/\",\r\n    \"reverse_proxy_url\": \"https://localhost:8184/proxy\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:5000/api/dataspace_connector/add_connector",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"dataspace_connector",
+						"add_connector"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get_Connector",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"id\": \"https://w3id.org/engrd/connector/provider21\"\r\n\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:5000/api/dataspace_connector/get_connector",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"dataspace_connector",
+						"get_connector"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create_Resource",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"connector_id\": \"https://w3id.org/engrd/connector/provider21\",\r\n    \"asset_id\": \"5a855d1eb692d5cfee0ac64c308b7626cd356e46d36ba4017bcd1332849f6061\",\r\n    \"type\": \"model\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:5000/api/dataspace_resource/create_resource",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"dataspace_resource",
+						"create_resource"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get_Resource",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"id\": \"https://w3id.org/engrd/connector/provider21\"\r\n\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:5000/api/dataspace_resource/get_resource/8f840986c277d47f3535d47f0d3bdb1652cd988baa55df788deb253f20f2d974",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"dataspace_resource",
+						"get_resource",
+						"8f840986c277d47f3535d47f0d3bdb1652cd988baa55df788deb253f20f2d974"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create_Resource_Descriptions",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Parse the response body as JSON\r",
+							"var responseData = pm.response.json();\r",
+							"\r",
+							"// Check if the token exists in the response\r",
+							"if (responseData.resource_description) {\r",
+							"    // Set the token as an environment variable\r",
+							"    pm.environment.set(\"resource_description\", responseData.resource_description);\r",
+							"}\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"title\": \"Example IDS Resource1\",\r\n    \"description\": \"This is an example IDS Resource\",\r\n    \"keywords\": [\"cords\", \"energy prediction\"]\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:5000/api/dataspace_resource/create_resource_description/8f840986c277d47f3535d47f0d3bdb1652cd988baa55df788deb253f20f2d974",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"dataspace_resource",
+						"create_resource_description",
+						"8f840986c277d47f3535d47f0d3bdb1652cd988baa55df788deb253f20f2d974"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Register_Resource",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"title\": \"Example IDS Resource1\",\r\n    \"description\": \"This is an example IDS Resource\",\r\n    \"keywords\": [\"cords\", \"energy prediction\"],\r\n    \"catalog_id\": \"https://w3id.org/idsa/autogen/resourceCatalog/ae9530d4-8756-456a-9bd0-b7e6ca2302b1\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:5000/api/dataspace_connector/register_resource/8f840986c277d47f3535d47f0d3bdb1652cd988baa55df788deb253f20f2d974",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"dataspace_connector",
+						"register_resource",
+						"8f840986c277d47f3535d47f0d3bdb1652cd988baa55df788deb253f20f2d974"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Download_Resource",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"consumer_ip\": \"127.0.0.1\",\r\n    \"consumer_port\": \"8765\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:5000/api/dataspace_resource/download_resource/8f840986c277d47f3535d47f0d3bdb1652cd988baa55df788deb253f20f2d974",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"dataspace_resource",
+						"download_resource",
+						"8f840986c277d47f3535d47f0d3bdb1652cd988baa55df788deb253f20f2d974"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Initiate Download",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"artifact_id\": \"http://w3id.org/engrd/connector/artifact/8f840986c277d47f3535d47f0d3bdb1652cd988baa55df788deb253f20f2d974\",\r\n    \"consumer_ip\": \"127.0.0.1\",\r\n    \"consumer_port\": \"8765\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:5000/api/dataspace_resource/initiate_download",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5000",
+					"path": [
+						"api",
+						"dataspace_resource",
+						"initiate_download"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
