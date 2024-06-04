@@ -1,13 +1,13 @@
 """
-Welcome to the documentation for the CORDS ML Model Management API!
+Welcome to the documentation for the CORDS Resource Management API!
 
 ## Introduction
 
-The ML Model Management API is an API (Application Programming Interface) designed to manage and track machine learning artifacts. This API facilitates the storage, retrieval, and management of artifacts generated during the machine learning workflow, particularly those produced by ML Flow. It also manages semantic descriptions of these ML artifacts to enhance understanding and usability.
+The Resource Management API is an API (Application Programming Interface) designed to manage and track machine learning artifacts. This API facilitates the storage, retrieval, and management of artifacts generated during the machine learning workflow, particularly those produced by ML Flow. It also manages semantic descriptions of these ML artifacts to enhance understanding and usability.
 
 ## Key Functionality
 
-The ML Model Management API provides the following functionality:
+The Resource Management API provides the following functionality:
 
 1. Manage ML Artifacts:
   * Create new entries for ML artifacts
