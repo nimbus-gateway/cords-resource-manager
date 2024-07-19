@@ -1,0 +1,43 @@
+{
+    "@type": "ids:Permission",
+    "@id": "https://w3id.org/idsa/autogen/permission/59b0a20a-11bd-4276-8341-af40c8960e98",
+    "ids:target": {
+      "@id": "https://w3id.org/idsa/autogen/artifact/8e3a5056-1e46-42e1-a1c3-37aa08b2aedd"
+    },
+    "ids:title": [
+      {
+        "@value": "Example Usage Policy",
+        "@type": "http://www.w3.org/2001/XMLSchema#string"
+      }
+    ],
+    "ids:description": [
+      {
+        "@value": "provide-access",
+        "@type": "http://www.w3.org/2001/XMLSchema#string"
+      }
+    ],
+    "ids:action": [
+      {
+        "@id": "idsc:USE"
+      }
+    ],
+    "ids:constraint": [
+      {
+        "@type": "ids:Constraint",
+        "@id": "https://w3id.org/idsa/autogen/constraint/2030a8f2-f03d-4af9-bce5-b9222e129dce",
+        "ids:rightOperand": {
+          "@value": "5",
+          "@type": "xsd:double"
+        },
+        "ids:operator": {
+          "@id": "idsc:LTEQ"
+        },
+        "ids:leftOperand": {
+          "@id": "idsc:COUNT"
+        },
+        "ids:pipEndpoint": {
+          "@id": "http://localhost:8080/platoontec/PlatoonDataUsage/1.0/admin/api/access/"
+        }
+      }
+    ]
+  }

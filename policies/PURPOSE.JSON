@@ -1,0 +1,42 @@
+{
+    "@type": "ids:Permission",
+    "@id": "https://w3id.org/idsa/autogen/permission/59b0a20a-11bd-4276-8341-af40c8960e98",
+    "ids:target": {
+      "@id": "https://w3id.org/idsa/autogen/artifact/8e3a5056-1e46-42e1-a1c3-37aa08b2aedd"
+    },
+    "ids:title": [
+      {
+        "@value": "Example Usage Policy",
+        "@type": "http://www.w3.org/2001/XMLSchema#string"
+      }
+    ],
+    "ids:description": [
+      {
+        "@value": "provide-access",
+        "@type": "http://www.w3.org/2001/XMLSchema#string"
+      }
+    ],
+    "ids:action": [
+      {
+        "@id": "idsc:USE"
+      }
+    ],
+    "ids:constraint": [
+      {
+        "@type": "ids:Constraint",
+        "@id": "https://w3id.org/idsa/autogen/constraint/constraint7",
+        "ids:rightOperandReference": {
+          "@id": "http://example.com/ids-purpose:Marketing"
+        },
+        "ids:operator": {
+          "@id": "idsc:SAME_AS"
+        },
+        "ids:leftOperand": {
+          "@id": "idsc:PURPOSE"
+        },
+        "ids:pipEndpoint": {
+          "@id": "http://localhost:8085/DataUsage/Pip/1.0/admin/api/purpose/"
+        }
+      }
+    ]
+  }

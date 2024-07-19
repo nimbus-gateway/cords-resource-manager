@@ -6,6 +6,7 @@ import requests
 from requests.auth import HTTPBasicAuth
 import traceback
 import uuid
+from src.models.policy_model import PolicyModel
 
 cert_path = "certs/cert.pem"
 
@@ -91,12 +92,33 @@ class TrueConnector:
             template["@context"].update(artifact_semantic["@context"])
             template["cords:mlmetadata"] = artifact_semantic["cords:mlmetadata"]
 
-            return template
+            new_template = self.create_permisions(resource_id, template)
+
+            return new_template
 
         except Exception as e:
             logging.error("TrueConnector: An error occurred: %s", str(e))
             traceback.print_exc()
             raise Exception("TrueConnector: An error occurred: %s", str(e))
+        
+    def create_permisions(self,resource_id, current_template):
+        policymodel = PolicyModel()
+
+        permissions = policymodel.formalize_policies(resource_id)
+
+        logging.info("Permissions: " + str(permissions))
+        current_template["ids:contractOffer"][0]["ids:permission"] = []
+
+
+        if len(permissions) > 0:
+            for i in range(len(permissions)):
+                permission = permissions[i]
+                current_template["ids:contractOffer"][0]["ids:permission"].append(permission)
+                current_template["ids:contractOffer"][0]["ids:permission"][i]["ids:target"]["@id"] = "http://w3id.org/engrd/connector/artifact/{0}".format(resource_id)
+
+        return current_template
+
+
         
     def register_resource(self, resource_description, catalog):
         url = "{0}/api/offeredResource/".format(settings.TRUE_CONNECTOR_SD_URL)
