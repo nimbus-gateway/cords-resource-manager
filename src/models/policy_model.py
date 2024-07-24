@@ -54,6 +54,7 @@ class PolicyModel():
         
         try:
              self.PURPOSE= self._load_json('policies/PURPOSE.json')
+             self.ROLE = self._load_json('policies/ROLE.json')
              self.EVALUATION_TIME = self._load_json('policies/EVALUATION_TIME.json')
              self.N_TIMES = self._load_json('policies/N_TIMES.json')
         except Exception as e:
@@ -90,8 +91,20 @@ class PolicyModel():
         policies = self.db.search((Policy.resource_id == resource_id) & (Policy.doc_type == 'policy'))
         if policies:
 
-            #print(self.formalize_policies(resource_id))
             return policies
+        else:
+            return False
+        
+    def remove_policy(self, policy_id):
+        """
+        Remove a policy linked to a resource.
+        :param policy_id: ID of the policy.
+        :return: True if the policy was removed, False otherwise.
+        """
+        Policy = Query()
+        result = self.db.remove(Policy.policy_id == policy_id)
+        if result:
+            return True
         else:
             return False
         
@@ -136,6 +149,21 @@ class PolicyModel():
                 if policy['policy_type'] == 'N-TIMES' or policy['policy_type'] == 'N_TIMES':
                     template = self.N_TIMES
                     template['ids:constraint'][0]['ids:rightOperand']['@value'] = policy['policy_metadata']['TIMES'] 
+                    template['ids:constraint'][0]['ids:pipEndpoint']['@id'] = policy['policy_metadata']['PIPENDPOINT'] 
+                    permissions.append(template)
+                
+
+                if policy['policy_type'] == 'PURPOSE':
+                    template = self.PURPOSE
+                    print(policy)
+                    template['ids:constraint'][0]['ids:rightOperandReference']['@id'] = policy['policy_metadata']['PURPOSE'] 
+                    template['ids:constraint'][0]['ids:pipEndpoint']['@id'] = policy['policy_metadata']['PIPENDPOINT'] 
+                    permissions.append(template)
+
+                if policy['policy_type'] == 'ROLE':
+                    template = self.ROLE
+                    template['ids:constraint'][0]['ids:rightOperandReference']['@id'] = policy['policy_metadata']['ROLE'] 
+                    template['ids:constraint'][0]['ids:pipEndpoint']['@id'] = policy['policy_metadata']['PIPENDPOINT'] 
                     permissions.append(template)
 
             return permissions        

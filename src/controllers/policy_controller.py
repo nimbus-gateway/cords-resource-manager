@@ -71,4 +71,20 @@ def get_policy(resource_id):
         return policy_response
     else:
         abort(404)
+
+
+@policy_blueprint.route('/remove_policy/<string:policy_id>', methods = ["DELETE"])
+# @response(MLModelSchemaResponse)
+# @other_responses({404: 'Entry not found'})
+@authenticate(token_auth)
+def remove_policy(policy_id):
+    """remove a policy linked to the resource"""
+
+    policy_response = new_policy.remove_policy(policy_id)
+
+    if policy_response:
+        return {'resopnse': policy_response}
+    else:
+        abort(404)
+        
         
