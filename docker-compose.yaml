@@ -19,7 +19,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: cords-resource-manager
+    container_name: cords_resource_manager
     ports:
       - "5000:5000"
     volumes:

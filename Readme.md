@@ -45,6 +45,12 @@ The project utilizes the following modules:
 
 * **MLFlow**: ML Flow Python SDK for connecting with MLFlow server  
 
+## Build From Source
+
+```
+docker build -t cords_resource_manager .
+docker compose up
+```
 
 ## Basic Flow 
 
