@@ -55,6 +55,7 @@ def add_model(kwargs):
 
 
     except Exception as e:
+        logging.error(str(e))
         error = {"status": "failed", "message": "Error Occured", "error":  str(e)}
         return error, 500
 
@@ -108,6 +109,7 @@ def update_model(kwargs, model_id):
             abort(404)
     
     except Exception as e:
+        logging.error(str(e))
         error = {"status": "failed", "message": "Error Occured", "error":  str(e)}
         return error, 500
     

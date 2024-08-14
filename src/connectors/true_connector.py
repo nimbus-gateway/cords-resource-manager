@@ -85,8 +85,9 @@ class TrueConnector:
 
             template["ids:representation"][0]["@id"] = "https://w3id.org/idsa/autogen/dataRepresentation/cords_{0}".format(resource_id)
             template["ids:representation"][0]["ids:instance"][0]["@id"] = "http://w3id.org/engrd/connector/artifact/{0}".format(resource_id)
-
             template["ids:contractOffer"][0]["ids:permission"][0]["ids:target"]["@id"] = "http://w3id.org/engrd/connector/artifact/{0}".format(resource_id)
+            template["ids:contractOffer"][0]["ids:permission"][0]["@id"] = "hellloooo"
+            
 
 
             template["@context"].update(artifact_semantic["@context"])
@@ -104,7 +105,11 @@ class TrueConnector:
     def create_permisions(self,resource_id, current_template):
         policymodel = PolicyModel()
 
+        
         permissions = policymodel.formalize_policies(resource_id)
+
+        logging.info("Generating an ID for contract")
+        current_template["ids:contractOffer"][0]["@id"] = "https://w3id.org/idsa/autogen/contractOffer/{0}".format(uuid.uuid4())
 
         logging.info("Permissions: " + str(permissions))
         current_template["ids:contractOffer"][0]["ids:permission"] = []
@@ -134,6 +139,7 @@ class TrueConnector:
         # Encode credentials for basic auth
         auth = HTTPBasicAuth(settings.TRUE_CONNECTOR_API_USER_NAME, settings.TRUE_CONNECTOR_API_PASSWORD)
 
+        logging.info("========= Final Resource Description ==============")
         print(resource_description)
         
         # Make the request
@@ -141,7 +147,7 @@ class TrueConnector:
         
         # Check the response
         if response.status_code == 200:
-            logging.debug("Request successful!")
+            logging.info("Request successful!")
             return response.json()  # Assuming the response is JSON
         else:
             logging.error("Failed to send request.")

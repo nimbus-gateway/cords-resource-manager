@@ -1,5 +1,6 @@
 
-from tinydb import TinyDB, Query
+from tinydb import TinyDB, Query, table
+from tinydb.table import Document
 from src import ma
 import re
 import hashlib
@@ -207,9 +208,13 @@ class DataSpaceResource():
 
         # Add hash to the document
         document['resource_id'] = hash_digest
-        
+
+        unique_id = max(self.db.all(), key=lambda x: x.doc_id).doc_id + 1 if self.db.all() else 1
+
         # Insert the new resource into the database
-        if self.db.insert(document):
+        logging.info("Adding the resource : {0}".format(str(document)))
+        logging.info("Unique ID : {0}".format(str(unique_id)))
+        if self.db.insert(table.Document(document, doc_id = unique_id)):
             return document, 201
         else:
             return False, 500
