@@ -1,0 +1,43 @@
+{
+    "@type": "ids:Permission",
+    "@id": "https://w3id.org/idsa/autogen/permission/location-check-12345",
+    "ids:target": {
+        "@id": "https://w3id.org/idsa/autogen/artifact/service/fl-participation"
+    },
+    "ids:title": [
+        {
+            "@value": "Geographic Restriction Policy",
+            "@type": "http://www.w3.org/2001/XMLSchema#string"
+        }
+    ],
+    "ids:description": [
+        {
+            "@value": "Restrict participation to Federated Learning clients from specified geographic regions.",
+            "@type": "http://www.w3.org/2001/XMLSchema#string"
+        }
+    ],
+    "ids:action": [
+        {
+            "@id": "idsc:USE"
+        }
+    ],
+    "ids:constraint": [
+        {
+            "@type": "ids:Constraint",
+            "@id": "https://w3id.org/idsa/autogen/constraint/location-check-required",
+            "ids:rightOperand": {
+                "@value": "EU",
+                "@type": "http://www.w3.org/2001/XMLSchema#string"
+            },
+            "ids:operator": {
+                "@id": "idsc:EQUALS"
+            },
+            "ids:leftOperand": {
+                "@id": "fl:participantLocation"
+            },
+            "ids:pipEndpoint": {
+                "@id": "http://localhost:8085/FL/Policies/Location"
+            }
+        }
+    ]
+}

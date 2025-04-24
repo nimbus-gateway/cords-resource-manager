@@ -1,0 +1,43 @@
+{
+    "@type": "ids:Permission",
+    "@id": "https://w3id.org/idsa/autogen/permission/performance-check-12345",
+    "ids:target": {
+        "@id": "https://w3id.org/idsa/autogen/artifact/service/fl-model-validation"
+    },
+    "ids:title": [
+        {
+            "@value": "Local Model Performance Policy",
+            "@type": "http://www.w3.org/2001/XMLSchema#string"
+        }
+    ],
+    "ids:description": [
+        {
+            "@value": "Ensure that only clients with sufficient local model performance contribute to the global model.",
+            "@type": "http://www.w3.org/2001/XMLSchema#string"
+        }
+    ],
+    "ids:action": [
+        {
+            "@id": "idsc:USE"
+        }
+    ],
+    "ids:constraint": [
+        {
+            "@type": "ids:Constraint",
+            "@id": "https://w3id.org/idsa/autogen/constraint/performance-check-required",
+            "ids:rightOperand": {
+                "@value": "80",
+                "@type": "http://www.w3.org/2001/XMLSchema#float"
+            },
+            "ids:operator": {
+                "@id": "idsc:GREATER_THAN_OR_EQUAL"
+            },
+            "ids:leftOperand": {
+                "@id": "fl:modelAccuracy"
+            },
+            "ids:pipEndpoint": {
+                "@id": "http://localhost:8085/FL/Policies/Performance"
+            }
+        }
+    ]
+}

@@ -52,6 +52,7 @@ class PolicyModel():
         """
         
         self.db = TinyDB(db_path)
+        self.policies = self.db.table("policies")
         self.Model = Query()
         
         try:
@@ -59,6 +60,12 @@ class PolicyModel():
              self.ROLE = self._load_json('policies/ROLE.json')
              self.EVALUATION_TIME = self._load_json('policies/EVALUATION_TIME.json')
              self.N_TIMES = self._load_json('policies/N_TIMES.json')
+             self.FL_SECURE_AGGREGATION = self._load_json('policies/FL_SECURE_AGGREGATION.json')
+             self.FL_PARTICIPANT_REPUTATION = self._load_json('policies/FL_PARTICIPANT_REPUTATION.json')
+             self.FL_PARTICIPANT_CPU = self._load_json('policies/FL_PARTICIPANT_CPU.json')
+             self.FL_PARTICIPANT_GEO = self._load_json('policies/FL_PARTICIPANT_GEO.json')
+             self.FL_LOCAL_MODEL_PERFORMANCE = self._load_json('policies/FL_LOCAL_MODEL_PERFORMANCE.json')
+             self.FL_INCENTIVE_REWARD = self._load_json('policies/FL_INCENTIVE_REWARD.json')
         except Exception as e:
              logging.error("One or more policy templates missing")
              raise e
@@ -79,24 +86,27 @@ class PolicyModel():
         document['policy_id'] = policy_id
         document['timestamp'] = str(datetime.now().isoformat())
 
-        unique_id = max(self.db.all(), key=lambda x: x.doc_id).doc_id + 1 if self.db.all() else 1
 
-        if self.db.insert(table.Document(document, doc_id = unique_id)):
-                return document
+        result = self.policies.insert(document)
+        if result:
+            logging.debug(f"Policy added successfully: {document}")
+            return document
         else:
-                return False
+            logging.error("Failed to add policy")
+            return False
         
     def get_policy(self, resource_id):
         """
-        Retrieve polices linked to a resource.
+        Retrieve policies linked to a resource.
         :param resource_id: ID of the resource.
         """
         Policy = Query()
-        policies = self.db.search((Policy.resource_id == resource_id) & (Policy.doc_type == 'policy'))
+        policies = self.policies.search(Policy.resource_id == resource_id)
+        logging.debug(f"Policies retrieved for resource_id {resource_id}: {policies}")
         if policies:
-
             return policies
         else:
+            logging.warning(f"No policies found for resource_id {resource_id}")
             return False
         
     def remove_policy(self, policy_id):
@@ -106,7 +116,7 @@ class PolicyModel():
         :return: True if the policy was removed, False otherwise.
         """
         Policy = Query()
-        result = self.db.remove(Policy.policy_id == policy_id)
+        result = self.policies.remove(Policy.policy_id == policy_id)
         if result:
             return True
         else:
@@ -139,49 +149,84 @@ class PolicyModel():
         return hash_obj.hexdigest()
     
     def formalize_policies(self, resource_id):
+        logging.debug("========== Formalizing the policies =============")
         Policy = Query()
-        policies = self.db.search((Policy.resource_id == resource_id) & (Policy.doc_type == 'policy'))
+        policies = self.policies.search(Policy.resource_id == resource_id)
         permissions = []
+        fL_permissions = []
+        print(policies)
         if policies:
-            
             for policy in policies:
                 if policy['policy_type'] == 'EVALUATION_TIME':
                     template = self.EVALUATION_TIME
-                    template["@id"] = "https://w3id.org/idsa/autogen/permission/{0}-{1}".format(resource_id, 'EVALUATION_TIME')
-                    template['ids:constraint'][0]['ids:rightOperand']['@value'] = policy['policy_metadata']['AFTER'] 
-                    template['ids:constraint'][1]['ids:rightOperand']['@value'] = policy['policy_metadata']['BEFORE'] 
-                    template['ids:constraint'][0]['@id'] = 'https://w3id.org/idsa/autogen/constraint/{0}'.format(uuid.uuid4())
-                    template['ids:constraint'][1]['@id'] = 'https://w3id.org/idsa/autogen/constraint/{0}'.format(uuid.uuid4())
+                    template["@id"] = str("https://w3id.org/idsa/autogen/permission/{0}-{1}".format(resource_id, 'EVALUATION_TIME'))
+                    template['ids:constraint'][0]['ids:rightOperand']['@value'] = str(policy['policy_metadata']['AFTER'])
+                    template['ids:constraint'][1]['ids:rightOperand']['@value'] = str(policy['policy_metadata']['BEFORE'])
+                    template['ids:constraint'][0]['@id'] = str('https://w3id.org/idsa/autogen/constraint/{0}'.format(uuid.uuid4()))
+                    template['ids:constraint'][1]['@id'] = str('https://w3id.org/idsa/autogen/constraint/{0}'.format(uuid.uuid4()))
                     permissions.append(template)
 
                 if policy['policy_type'] == 'N-TIMES' or policy['policy_type'] == 'N_TIMES':
                     template = self.N_TIMES
-                    template["@id"] = "https://w3id.org/idsa/autogen/permission/{0}-{1}".format(resource_id, 'N-TIMES')
-                    template['ids:constraint'][0]['ids:rightOperand']['@value'] = policy['policy_metadata']['TIMES'] 
-                    template['ids:constraint'][0]['ids:pipEndpoint']['@id'] = policy['policy_metadata']['PIPENDPOINT'] 
-                    template['ids:constraint'][0]['@id'] = 'https://w3id.org/idsa/autogen/constraint/{0}'.format(uuid.uuid4())
+                    template["@id"] = str("https://w3id.org/idsa/autogen/permission/{0}-{1}".format(resource_id, 'N-TIMES'))
+                    template['ids:constraint'][0]['ids:rightOperand']['@value'] = str(policy['policy_metadata']['TIMES'])
+                    template['ids:constraint'][0]['ids:pipEndpoint']['@id'] = str(policy['policy_metadata']['PIPENDPOINT'])
+                    template['ids:constraint'][0]['@id'] = str('https://w3id.org/idsa/autogen/constraint/{0}'.format(uuid.uuid4()))
                     permissions.append(template)
-                
 
                 if policy['policy_type'] == 'PURPOSE':
                     template = self.PURPOSE
-                    print(policy)
-                    template["@id"] = "https://w3id.org/idsa/autogen/permission/{0}-{1}".format(resource_id, 'PURPOSE')
-                    template['ids:constraint'][0]['ids:rightOperandReference']['@id'] = policy['policy_metadata']['PURPOSE'] 
-                    template['ids:constraint'][0]['ids:pipEndpoint']['@id'] = policy['policy_metadata']['PIPENDPOINT'] 
-                    template['ids:constraint'][0]['@id'] = 'https://w3id.org/idsa/autogen/constraint/{0}'.format(uuid.uuid4())
+                    template["@id"] = str("https://w3id.org/idsa/autogen/permission/{0}-{1}".format(resource_id, 'PURPOSE'))
+                    template['ids:constraint'][0]['ids:rightOperandReference']['@id'] = str(policy['policy_metadata']['PURPOSE'])
+                    template['ids:constraint'][0]['ids:pipEndpoint']['@id'] = str(policy['policy_metadata']['PIPENDPOINT'])
+                    template['ids:constraint'][0]['@id'] = str('https://w3id.org/idsa/autogen/constraint/{0}'.format(uuid.uuid4()))
                     permissions.append(template)
 
                 if policy['policy_type'] == 'ROLE':
                     template = self.ROLE
-                    template["@id"] = "https://w3id.org/idsa/autogen/permission/{0}-{1}".format(resource_id, 'ROLE')
-                    template['ids:constraint'][0]['ids:rightOperandReference']['@id'] = policy['policy_metadata']['ROLE'] 
-                    template['ids:constraint'][0]['ids:pipEndpoint']['@id'] = policy['policy_metadata']['PIPENDPOINT'] 
-                    template['ids:constraint'][0]['@id'] = 'https://w3id.org/idsa/autogen/constraint/{0}'.format(uuid.uuid4())
+                    template["@id"] = str("https://w3id.org/idsa/autogen/permission/{0}-{1}".format(resource_id, 'ROLE'))
+                    template['ids:constraint'][0]['ids:rightOperandReference']['@id'] = str(policy['policy_metadata']['ROLE'])
+                    template['ids:constraint'][0]['ids:pipEndpoint']['@id'] = str(policy['policy_metadata']['PIPENDPOINT'])
+                    template['ids:constraint'][0]['@id'] = str('https://w3id.org/idsa/autogen/constraint/{0}'.format(uuid.uuid4()))
                     permissions.append(template)
 
+                if policy['policy_type'] == 'FL_SECURE_AGGREGATION':
+                    template = self.ROLE
+                    template["@id"] = str("https://w3id.org/idsa/autogen/permission/{0}-{1}".format(resource_id, 'FL_SECURE_AGGREGATION'))
+                    template['ids:constraint'][0]['ids:rightOperandReference']['@id'] = str(policy['policy_metadata']['AGGREGATION_ALGORITHM'])
+                    template['ids:constraint'][0]['ids:pipEndpoint']['@id'] = str(policy['policy_metadata']['PIPENDPOINT'])
+                    template['ids:constraint'][0]['@id'] = str('https://w3id.org/idsa/autogen/constraint/{0}'.format(uuid.uuid4()))
+                    fL_permissions.append(template)
 
-            return permissions        
+                if policy['policy_type'] == 'FL_PARTICIPANT_REPUTATION':
+                    template = self.ROLE
+                    template["@id"] = str("https://w3id.org/idsa/autogen/permission/{0}-{1}".format(resource_id, 'FL_PARTICIPANT_REPUTATION'))
+                    template['ids:constraint'][0]['ids:rightOperandReference']['@id'] = str(policy['policy_metadata']['MIN_PARTICIPANT_REPUTATION'])
+                    template['ids:constraint'][0]['ids:pipEndpoint']['@id'] = str(policy['policy_metadata']['PIPENDPOINT'])
+                    template['ids:constraint'][0]['@id'] = str('https://w3id.org/idsa/autogen/constraint/{0}'.format(uuid.uuid4()))
+                    fL_permissions.append(template)
+
+                if policy['policy_type'] == 'FL_PARTICIPANT_CPU':
+                    template = self.ROLE
+                    template["@id"] = str("https://w3id.org/idsa/autogen/permission/{0}-{1}".format(resource_id, 'FL_PARTICIPANT_CPU'))
+                    template['ids:constraint'][0]['ids:rightOperandReference']['@id'] = str(policy['policy_metadata']['FL_PARTICIPANT_CPU'])
+                    template['ids:constraint'][0]['ids:pipEndpoint']['@id'] = str(policy['policy_metadata']['PIPENDPOINT'])
+                    template['ids:constraint'][0]['@id'] = str('https://w3id.org/idsa/autogen/constraint/{0}'.format(uuid.uuid4()))
+                    fL_permissions.append(template)
+
+                if policy['policy_type'] == 'FL_LOCAL_MODEL_EVALUATION':
+                    template = self.ROLE
+                    template["ids:action"][0]["@id"] = str("fl:aggregate")
+                    template["@id"] = str("https://w3id.org/idsa/autogen/permission/{0}-{1}".format(resource_id, 'FL_LOCAL_MODEL_EVALUATION'))
+                    template['ids:constraint'][0]['ids:leftOperand']['@id'] = str(policy['policy_metadata']['FL_ModelEvaluation_SpecifiedBy'])
+                    template['ids:constraint'][0]['ids:rightOperandReference']['@id'] = str(policy['policy_metadata']['FL_ModelEvaluation_HasValue'])
+                    template['ids:constraint'][0]['ids:operator']['@id'] = str(policy['policy_metadata']['FL_Contraint_Operator'])
+                    template['ids:constraint'][0]['ids:pipEndpoint']['@id'] = str(policy['policy_metadata']['PIPENDPOINT'])
+                    template['ids:constraint'][0]['@id'] = str('https://w3id.org/idsa/autogen/constraint/{0}'.format(uuid.uuid4()))
+                    fL_permissions.append(template)
+
+
+        return permissions, fL_permissions        
 
 
 

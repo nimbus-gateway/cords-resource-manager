@@ -17,8 +17,10 @@ import threading
 import zipfile
 
 from src.models.ml_model import MlModel
+from src.models.fl_service import FLService
 
 model = MlModel()
+fl_service = FLService()
 
 
 class DataSpaceResourceSchemaResponse(ma.Schema):
@@ -180,6 +182,7 @@ class DataSpaceResource():
         :param db_path: Path to the TinyDB database file.
         """
         self.db = TinyDB(db_path)
+        self.resource = self.db.table("resource")
 
     def create_resource(self, connector_id, asset_id, _type='model'):
         """
@@ -199,7 +202,8 @@ class DataSpaceResource():
             'connector_id': connector_id,
             'asset_id': asset_id,
             'type': _type,
-            'timestamp': timestamp
+            'timestamp': timestamp,
+            'doc_type': 'resource',
         }
         
         # Convert document to string and encode it to generate a hash
@@ -209,12 +213,9 @@ class DataSpaceResource():
         # Add hash to the document
         document['resource_id'] = hash_digest
 
-        unique_id = max(self.db.all(), key=lambda x: x.doc_id).doc_id + 1 if self.db.all() else 1
-
         # Insert the new resource into the database
         logging.info("Adding the resource : {0}".format(str(document)))
-        logging.info("Unique ID : {0}".format(str(unique_id)))
-        if self.db.insert(table.Document(document, doc_id = unique_id)):
+        if self.resource.insert(document):
             return document, 201
         else:
             return False, 500
@@ -227,7 +228,7 @@ class DataSpaceResource():
         :return: Resource document if found, otherwise None.
         """
         ResourceQuery = Query()
-        result = self.db.search(ResourceQuery.resource_id == resource_id)
+        result = self.resource.search(ResourceQuery.resource_id == resource_id)
         if result:
             return result[0]
         else:
@@ -242,7 +243,7 @@ class DataSpaceResource():
         :return: Updated resource document or False if update fails.
         """
         ResourceQuery = Query()
-        found = self.db.search(ResourceQuery.resource_id == resource_id)
+        found = self.resource.search(ResourceQuery.resource_id == resource_id)
         if not found:
             return False, 404
 
@@ -253,8 +254,8 @@ class DataSpaceResource():
             updated_document = self.db.get(ResourceQuery.resource_id == resource_id)
             updated_document_string = str(updated_document).encode('utf-8')
             new_hash = hashlib.sha256(updated_document_string).hexdigest()
-            self.db.update({'resource_id': new_hash}, ResourceQuery.resource_id == resource_id)
-            return self.db.get(ResourceQuery.resource_id == new_hash), 200
+            self.resource.update({'resource_id': new_hash}, ResourceQuery.resource_id == resource_id)
+            return self.resource.get(ResourceQuery.resource_id == new_hash), 200
         else:
             return False, 500
         
@@ -279,7 +280,7 @@ class DataSpaceResource():
     
         ResourceQuery = Query()
     
-        found = self.db.search(ResourceQuery.resource_id == resource_id)
+        found = self.resource.search(ResourceQuery.resource_id == resource_id)
 
         if found:
             response = {
@@ -288,23 +289,31 @@ class DataSpaceResource():
                 "resource_description": ""
             }
 
-            model_id = found[0]['asset_id']
+            asset_id = found[0]['asset_id']
+            type_of_the_asset = found[0]['type'] 
 
-            logging.debug("Generating the sematnics for model %s", model_id)
-            semantics = model.generate_semantics(model_id)
+            if type_of_the_asset == 'model':
+                logging.debug("Generating the sematnics for model %s", asset_id)
+                semantics = model.generate_semantics(asset_id)
+            
+            elif type_of_the_asset == 'fl_service':
+                logging.debug("Generating the sematnics for fl service %s", asset_id)
+                semantics = fl_service.generate_semantics(asset_id)
+            
+            
             if semantics:
 
                 if connector == "trueconnector":
                     try:
                         true_connector = TrueConnector()
-                        response['resource_description'] = true_connector.create_model_resource_description(resource_id, title, description, keywords, semantics)
+                        response['resource_description'] = true_connector.create_resource_description(resource_id, type_of_the_asset, title, description, keywords, semantics)
                         return response, 200
                     except Exception as e:
                         logging.error("Resource descriptopn creation failed %s", str(e))
                         return False, 500
                     
             else:
-                logging.error("Sematnic Creation Returned False")
+                logging.error("Sematic Creation Returned False")
                 return False, 500
             
         else:
@@ -319,7 +328,7 @@ class DataSpaceResource():
 
         ResourceQuery = Query()
     
-        found = self.db.search(ResourceQuery.resource_id == resource_id)
+        found = self.resource.search(ResourceQuery.resource_id == resource_id)
 
         if found:
             print(found)

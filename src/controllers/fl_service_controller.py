@@ -2,7 +2,7 @@ from flask import request, Response, json, Blueprint, jsonify, abort
 from src.models.fl_service import FLService, FLServiceSchema, FLServiceSchemaResponse, MLSemanticSchema
 from src.models.error_model import ErrorReponseSchema
 from apifairy import body, other_responses, response, authenticate
-from cords_semantics.semantics import MlSemanticManager
+from cords_semantics.semantics import FlSemanticManager
 from cords_semantics.mlflow import convert_tags_to_dictionary, extract_mlflow_semantics
 from src import basic_auth, token_auth
 import mlflow
@@ -11,7 +11,11 @@ from config import settings
 
 
 
-logging.basicConfig(level=logging.DEBUG)  
+# Configure logging with file name, function name, and line number
+logging.basicConfig(
+    level=logging.DEBUG,
+    format='%(asctime)s - %(levelname)s - %(filename)s:%(lineno)d - %(funcName)s - %(message)s'
+)
 
 
 # user controller blueprint to be registered with api blueprint
@@ -24,7 +28,7 @@ fl_service = FLService()
 
 
 @fl_services.route('/add', methods = ["POST"])
-@authenticate(token_auth)
+# @authenticate(token_auth)
 @response(fl_service_response_schema, 201)
 @other_responses({400: error_response_schema})
 @body(fl_service_schema)
@@ -41,15 +45,17 @@ def add_service(kwargs):
         name = data.get('name')
         description = data.get('description')
         fl_session = data.get('fl_session')
-        fl_participants = data.get('fl_participants')
         fl_aggregation = data.get('fl_aggregation')
         fl_communication = data.get('fl_communication')
-        fl_security_privacy = data.get('fl_security_privacy')
+        fl_security = data.get('fl_security')
         fl_training = data.get('fl_training')
 
         # Check for missing required fields
-        required_fields = [name, description, fl_session, fl_participants, 
-                           fl_aggregation, fl_communication, fl_security_privacy, fl_training]
+        required_fields = [name, description, fl_session,  
+                           fl_aggregation, fl_communication, fl_security, fl_training]
+        
+        print("required fields")
+        print(required_fields)
         
         if not all(required_fields):
             error = {"status": "failed", "message": "Error Occurred", "error": "Missing required fields"}
@@ -58,8 +64,8 @@ def add_service(kwargs):
         # Call the service function to add the FL service
         resp = fl_service.add_fl_service(
             name, description, 
-            fl_session, fl_participants, fl_aggregation, 
-            fl_communication, fl_security_privacy, fl_training
+            fl_session, fl_aggregation, 
+            fl_communication, fl_security, fl_training
         )
 
         # If successful, return the response
@@ -75,66 +81,116 @@ def add_service(kwargs):
         return error, 500
 
 
-# @ml_models.route('/get_model/<string:model_id>', methods = ["GET"])
-# @response(MLModelSchemaResponse)
-# @other_responses({404: 'Entry not found'})
+@fl_services.route('/get/<string:fl_service_id>', methods=["GET"])
 # @authenticate(token_auth)
-# def get_model(model_id):
-#     """Return a ML Model Entry"""
+@response(fl_service_response_schema, 200)
+@other_responses({404: error_response_schema})
+def get_service(fl_service_id):
+    """Retrieve an FL service entry by its ID"""
+    try:
+        service = fl_service.get_fl_service(fl_service_id)
 
-#     model_response = new_model.get_model(model_id)
+        if service:
+            return service[0], 200
+        else:
+            error = {"status": "failed", "message": "FL Service not found", "error": f"Service ID {fl_service_id} not found"}
+            return error, 404
 
-#     if model_response:
-#         print(model_response)
-#         return model_response[0]
-#     else:
-#         abort(404)
-        
-
-
-
-# @ml_models.route('/update_model/<string:model_id>', methods=['PUT'])
-# @body(ml_model_schema)
-# @authenticate(token_auth)
-# @response(ml_model_response_schema)
-# @other_responses({404: 'Entry not found'})
-# def update_model(kwargs, model_id):
-#     """Update a ML Model Entry"""
-#     try:
-#         data = request.get_json()
-#         if not data:
-#             error = {"status": "failed", "message": "Error Occured", "error": "No data provided"}
-#             return error, 400
-
-#         name = data.get('name')
-#         version = data.get('version')
-#         description = data.get('description')
-#         ml_flow_model_path = data.get('ml_flow_model_path')
-
-        
-#         if not all([name, version, description, ml_flow_model_path]):
-#             error = {"status": "failed", "message": "Error Occured", "error": "Missing data"}
-#             return error, 400
-#         #model_id = kwargs['model_id']
-#         model_response = new_model.update_model(model_id, name, version, description, ml_flow_model_path)
- 
-#         if model_response:
-#             return model_response[0]
-#         else:
-#             abort(404)
+    except Exception as e:
+        logging.error(str(e))
+        error = {"status": "failed", "message": "Error Occurred", "error": str(e)}
+        return error, 500
     
-#     except Exception as e:
-#         logging.error(str(e))
-#         error = {"status": "failed", "message": "Error Occured", "error":  str(e)}
-#         return error, 500
-    
+@fl_services.route('/list', methods=["GET"])
+def list_services():
+    """List all available FL services"""
+    try:
+        services = fl_service.get_all_services()
 
-# @ml_models.route('/generate_semantics/<string:model_id>', methods = ["GET"])
+        if services:
+            return jsonify(services), 200
+        else:
+            return {"status": "success", "message": "No FL services available"}, 200
+
+    except Exception as e:
+        logging.error(str(e))
+        error = {"status": "failed", "message": "Error Occurred", "error": str(e)}
+        return error, 500
+
+
+@fl_services.route('/update/<string:fl_service_id>', methods=["PUT"])
+#@authenticate(token_auth)
+@response(fl_service_response_schema, 200)
+@other_responses({400: error_response_schema, 404: error_response_schema})
+@body(fl_service_schema)
+def update_service(fl_service_id, kwargs):
+    """Update an existing FL service entry"""
+    try:
+        data = request.get_json()
+        if not data:
+            error = {"status": "failed", "message": "Error Occurred", "error": "No data provided"}
+            return error, 400
+
+        # Extract updated fields
+        name = data.get('name')
+        description = data.get('description')
+        fl_session = data.get('fl_session')
+        fl_aggregation = data.get('fl_aggregation')
+        fl_communication = data.get('fl_communication')
+        fl_security_privacy = data.get('fl_security_privacy')
+        fl_training = data.get('fl_training')
+
+        # Validate required fields
+        required_fields = [name, description, fl_session,  
+                           fl_aggregation, fl_communication, fl_security_privacy, fl_training]
+
+        if not all(required_fields):
+            error = {"status": "failed", "message": "Error Occurred", "error": "Missing required fields"}
+            return error, 400
+
+        # Call the service function to update the FL service
+        resp = fl_service.update_fl_session(
+            fl_service_id, name, description
+        )
+
+        # If update was successful, return updated service details
+        if resp:
+            return resp, 200
+        else:
+            error = {"status": "failed", "message": "FL Service not found", "error": f"Service ID {fl_service_id} not found"}
+            return error, 404
+
+    except Exception as e:
+        logging.error(str(e))
+        error = {"status": "failed", "message": "Error Occurred", "error": str(e)}
+        return error, 500
+
+@fl_services.route('/generate_semantics/<string:fl_service_id>', methods = ["GET"])
 # @response(ml_semantic_schema)
 # @authenticate(token_auth)
-# def generate_semantics(model_id):
-#     """Generate semantic description"""
-#     try:
+def generate_semantics(fl_service_id):
+    """Generate semantic description"""
+    try:
+        fl_semantic_manager = FlSemanticManager('data/cords_federated_learning.rdf')
+
+        service = fl_service.get_fl_service(fl_service_id)[0]
+        
+
+        tags = convert_json_to_cords_format(service)
+        logging.info(tags)
+        semantics_dictionary = convert_tags_to_dictionary([tags])
+        logging.info(semantics_dictionary)
+        semantics = fl_semantic_manager.create_fl_semantics(semantics_dictionary)
+        logging.info(semantics)
+        return semantics, 200
+
+
+    except Exception as e:
+        error = {"status": "failed", "message": "Error Occured", "error":  str(e)}
+        logging.error(e)
+        return error, 500
+
+    
 #         mlflow.set_tracking_uri(settings.MLFLOW_URI)
 #         semantic_manager = MlSemanticManager('data/cordsml.rdf')
         
@@ -159,3 +215,43 @@ def add_service(kwargs):
 #         error = {"status": "failed", "message": "Error Occured", "error":  str(e)}
 #         logging.error(e)
 #         return error, 500
+
+
+
+def convert_json_to_cords_format(input_json):
+    mapping = {
+        "fl_session": "cords.FLSession",
+        "fl_aggregation": "cords.FLAggregation",
+        "fl_communication": "cords.FLCommunication",
+        "fl_security": "cords.FLSecurity",
+        "fl_training": "cords.FLTraining"
+    }
+    
+    key_mapping = {
+        "session_id": "sessionID",
+        "session_start_time": "sessionStartTime",
+        "session_end_time": "sessionEndTime",
+        "num_min_clients": "numMinClients",
+        "num_max_clients": "numMaxClients",
+        "participation_ratio": "participationRatio",
+        "aggregation_method": "aggregationAlgorithm",
+        "aggregation_frequency": "aggregationFrequency",
+        "communication_protocol": "communicationProtocol",
+        "secure_aggregation_enabled": "secureAggregationEnabled",
+        "differential_privacy_enabled": "differentialPrivacyEnabled",
+        "encryption_method": "encryptionMethod",
+        "training_rounds": "trainingRounds",
+        "local_epochs": "localEpochs",
+        "loss_function": "lossFunction"
+    }
+    
+    transformed_data = {}
+    
+    for key, value in input_json.items():
+        if key in mapping:  # Handle nested structures
+            prefix = mapping[key]
+            for sub_key, sub_value in value.items():
+                if sub_key in key_mapping:
+                    transformed_data[f"{prefix}.{key_mapping[sub_key]}"] = sub_value
+        
+    return transformed_data

@@ -1,0 +1,60 @@
+{
+  "@type": "ids:ContractOffer",
+  "@id": "https://w3id.org/idsa/autogen/contractOffer/efgh5678-1234-90ab-cdef-ghij56789012",
+  "ids:permission": [
+    {
+      "@type": "ids:Permission",
+      "@id": "https://w3id.org/idsa/autogen/permission/efgh5678-1234-90ab-cdef-ghij56789012",
+      "ids:target": {
+        "@id": "http://w3id.org/engrd/connector/artifact/1"
+      },
+      "ids:description": [],
+      "ids:title": [],
+      "ids:action": [
+        {
+          "@id": "https://w3id.org/idsa/code/USE"
+        }
+      ],
+      "ids:assignee": [
+        {
+          "@id": "https://assignee.com"
+        }
+      ],
+      "ids:assigner": [
+        {
+          "@id": "https://assigner.com"
+        }
+      ],
+      "ids:preDuty": [],
+      "ids:postDuty": [],
+      "ids:constraint": [
+        {
+          "@type": "ids:Constraint",
+          "@id": "https://w3id.org/idsa/autogen/constraint/efgh5678-1234-90ab-cdef-ghij56789012",
+          "ids:rightOperand": {
+            "@value": ["Model Inference", "Transfer Learning", "Federated Learning"],
+            "@type": "xsd:string"
+          },
+          "ids:leftOperand": {
+            "@id": "https://w3id.org/idsa/code/PURPOSE"
+          },
+          "ids:operator": {
+            "@id": "https://w3id.org/idsa/code/EQUALS"
+          }
+        }
+      ]
+    }
+  ],
+  "ids:provider": {
+    "@id": "https://provider.com"
+  },
+  "ids:contractDate": {
+    "@value": "2022-02-14T14:28:48.898+01:00",
+    "@type": "http://www.w3.org/2001/XMLSchema#dateTimeStamp"
+  },
+  "ids:obligation": [],
+  "ids:prohibition": [],
+  "ids:consumer": {
+    "@id": "https://consumer.com"
+  }
+}

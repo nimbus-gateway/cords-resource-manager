@@ -1,0 +1,43 @@
+{
+    "@type": "ids:Permission",
+    "@id": "https://w3id.org/idsa/autogen/permission/secure-aggregation-12345",
+    "ids:target": {
+      "@id": "https://w3id.org/idsa/autogen/artifact/service/8e3a5056-1e46-42e1-a1c3-37aa08b2aedd"
+    },
+    "ids:title": [
+      {
+        "@value": "Secure Aggregation Policy",
+        "@type": "http://www.w3.org/2001/XMLSchema#string"
+      }
+    ],
+    "ids:description": [
+      {
+        "@value": "Ensure that federated learning aggregation is performed securely.",
+        "@type": "http://www.w3.org/2001/XMLSchema#string"
+      }
+    ],
+    "ids:action": [
+      {
+        "@id": "idsc:USE"
+      }
+    ],
+    "ids:constraint": [
+      {
+        "@type": "ids:Constraint",
+        "@id": "https://w3id.org/idsa/autogen/constraint/secure-aggregation-required",
+        "ids:rightOperandReference": {
+          "@id": "http://example.com/aggregationAlgorithm:FedAvg"
+        },
+        "ids:operator": {
+          "@id": "idsc:REQUIRES"
+        },
+        "ids:leftOperand": {
+          "@id": "fl:aggregationAlgorithm"
+        },
+        "ids:pipEndpoint": {
+          "@id": "http://localhost:8085/FL/Policies/Aggregation"
+        }
+      }
+
+    ]
+  }

@@ -1,0 +1,43 @@
+{
+    "@type": "ids:Permission",
+    "@id": "https://w3id.org/idsa/autogen/permission/reward-check-12345",
+    "ids:target": {
+        "@id": "https://w3id.org/idsa/autogen/artifact/service/fl-incentives"
+    },
+    "ids:title": [
+        {
+            "@value": "Minimum Reward Policy",
+            "@type": "http://www.w3.org/2001/XMLSchema#string"
+        }
+    ],
+    "ids:description": [
+        {
+            "@value": "Ensure that all FL participants receive a minimum reward per contribution.",
+            "@type": "http://www.w3.org/2001/XMLSchema#string"
+        }
+    ],
+    "ids:action": [
+        {
+            "@id": "idsc:USE"
+        }
+    ],
+    "ids:constraint": [
+        {
+            "@type": "ids:Constraint",
+            "@id": "https://w3id.org/idsa/autogen/constraint/reward-check-required",
+            "ids:rightOperand": {
+                "@value": "10",
+                "@type": "http://www.w3.org/2001/XMLSchema#float"
+            },
+            "ids:operator": {
+                "@id": "idsc:GREATER_THAN_OR_EQUAL"
+            },
+            "ids:leftOperand": {
+                "@id": "fl:rewardAmount"
+            },
+            "ids:pipEndpoint": {
+                "@id": "http://localhost:8085/FL/Policies/Rewards"
+            }
+        }
+    ]
+}

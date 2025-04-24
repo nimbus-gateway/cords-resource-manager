@@ -1,0 +1,60 @@
+{
+  "@type": "ids:ContractOffer",
+  "@id": "https://w3id.org/idsa/autogen/contractOffer/ijkl9012-3456-78mn-opqr-stuv34567890",
+  "ids:permission": [
+    {
+      "@type": "ids:Permission",
+      "@id": "https://w3id.org/idsa/autogen/permission/ijkl9012-3456-78mn-opqr-stuv34567890",
+      "ids:target": {
+        "@id": "http://w3id.org/engrd/connector/artifact/1"
+      },
+      "ids:description": [],
+      "ids:title": [],
+      "ids:action": [
+        {
+          "@id": "https://w3id.org/idsa/code/USE"
+        }
+      ],
+      "ids:assignee": [
+        {
+          "@id": "https://assignee.com"
+        }
+      ],
+      "ids:assigner": [
+        {
+          "@id": "https://assigner.com"
+        }
+      ],
+      "ids:preDuty": [],
+      "ids:postDuty": [],
+      "ids:constraint": [
+        {
+          "@type": "ids:Constraint",
+          "@id": "https://w3id.org/idsa/autogen/constraint/ijkl9012-3456-78mn-opqr-stuv34567890",
+          "ids:rightOperand": {
+            "@value": ["Germany", "France", "USA"],
+            "@type": "xsd:string"
+          },
+          "ids:leftOperand": {
+            "@id": "https://w3id.org/idsa/code/GEO_LOCATION"
+          },
+          "ids:operator": {
+            "@id": "https://w3id.org/idsa/code/EQUALS"
+          }
+        }
+      ]
+    }
+  ],
+  "ids:provider": {
+    "@id": "https://provider.com"
+  },
+  "ids:contractDate": {
+    "@value": "2022-02-14T14:28:48.898+01:00",
+    "@type": "http://www.w3.org/2001/XMLSchema#dateTimeStamp"
+  },
+  "ids:obligation": [],
+  "ids:prohibition": [],
+  "ids:consumer": {
+    "@id": "https://consumer.com"
+  }
+}

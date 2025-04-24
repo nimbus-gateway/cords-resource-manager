@@ -19,7 +19,7 @@ ds_resource_model = DataSpaceResource()
 
 
 @ds_resource.route('/create_resource', methods = ["POST"])
-@authenticate(token_auth)
+#@authenticate(token_auth)
 @response(DataSpaceResourceSchemaResponse)
 @body(DataSpaceResourceSchema)
 def create_resource(kwargs):
@@ -58,7 +58,7 @@ def create_resource(kwargs):
         return error, 500
     
 @ds_resource.route('/get_resource/<resource_id>', methods=["GET"])
-@authenticate(token_auth)
+#@authenticate(token_auth)
 @response(DataSpaceResourceSchemaResponse)
 def get_resource(resource_id):
     """Retrieve a resource by its unique hash identifier (resource_id)"""
@@ -81,7 +81,7 @@ def get_resource(resource_id):
     
     
 @ds_resource.route('/create_resource_description/<resource_id>', methods=["POST"])
-@authenticate(token_auth)
+#@authenticate(token_auth)
 @response(DataSpaceResourceDescriptionSchema)
 def create_resource_description(resource_id):
     """Create a resource description using IDS information model"""

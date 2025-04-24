@@ -7,13 +7,17 @@ import hashlib
 import json
 from datetime import datetime
 from marshmallow import Schema, fields, validate
-from cords_semantics.semantics import MlSemanticManager
+from cords_semantics.semantics import FlSemanticManager
 from cords_semantics.mlflow import convert_tags_to_dictionary, extract_mlflow_semantics
 import mlflow
 import logging
 from config import settings
 
-logging.basicConfig(level=logging.DEBUG)  
+logging.basicConfig(
+    level=logging.DEBUG,
+    format='%(asctime)s - %(levelname)s - %(filename)s:%(lineno)d - %(funcName)s - %(message)s'
+)
+
 
 class MLSemanticSchema(ma.Schema):
     """Schema defining the semantics of a registeed ML Model."""
@@ -49,21 +53,13 @@ class FLServiceSchemaResponse(ma.Schema):
         Schema.from_dict({
             "session_id": fields.String(required=True, description="Unique identifier for an FL session"),
             "session_start_time": fields.String(required=True, description="Timestamp when FL session started"),
-            "session_end_time": fields.String(required=True, description="Timestamp when FL session ended")
-        }),
-        required=True,
-        description="Details of the federated learning session"
-    )
-
-    # FL Participants
-    fl_participants = fields.Nested(
-        Schema.from_dict({
+            "session_end_time": fields.String(required=True, description="Timestamp when FL session ended"),
             "num_min_clients": fields.Integer(required=True, description="Minimum number of clients required"),
             "num_max_clients": fields.Integer(required=True, description="Maximum number of clients allowed"),
             "participation_ratio": fields.Float(required=True, description="Ratio of selected clients per training round")
         }),
         required=True,
-        description="Details about the clients participating in the FL session"
+        description="Details of the federated learning session"
     )
 
     # FL Aggregation
@@ -87,7 +83,7 @@ class FLServiceSchemaResponse(ma.Schema):
     )
 
     # FL Security & Privacy
-    fl_security_privacy = fields.Nested(
+    fl_security = fields.Nested(
         Schema.from_dict({
             "differential_privacy_enabled": fields.Boolean(required=True, description="Whether differential privacy is applied (Yes/No)"),
             "encryption_method": fields.String(required=True, description="Encryption method used for secure FL communication")
@@ -136,21 +132,13 @@ class FLServiceSchema(Schema):
         Schema.from_dict({
             "session_id": fields.String(required=True, description="Unique identifier for an FL session"),
             "session_start_time": fields.String(required=True, description="Timestamp when FL session started"),
-            "session_end_time": fields.String(required=True, description="Timestamp when FL session ended")
-        }),
-        required=True,
-        description="Details of the federated learning session"
-    )
-
-    # FL Participants
-    fl_participants = fields.Nested(
-        Schema.from_dict({
+            "session_end_time": fields.String(required=True, description="Timestamp when FL session ended"),
             "num_min_clients": fields.Integer(required=True, description="Minimum number of clients required"),
             "num_max_clients": fields.Integer(required=True, description="Maximum number of clients allowed"),
             "participation_ratio": fields.Float(required=True, description="Ratio of selected clients per training round")
         }),
         required=True,
-        description="Details about the clients participating in the FL session"
+        description="Details of the federated learning session"
     )
 
     # FL Aggregation
@@ -174,7 +162,7 @@ class FLServiceSchema(Schema):
     )
 
     # FL Security & Privacy
-    fl_security_privacy = fields.Nested(
+    fl_security = fields.Nested(
         Schema.from_dict({
             "differential_privacy_enabled": fields.Boolean(required=True, description="Whether differential privacy is applied (Yes/No)"),
             "encryption_method": fields.String(required=True, description="Encryption method used for secure FL communication")
@@ -202,9 +190,10 @@ class FLService():
         :param db_path: Path to the TinyDB database file.
         """
         self.db = TinyDB(db_path)
+        self.fl_services = self.db.table("fl_services")
         self.Model = Query()
 
-    def add_fl_service(self, name, description, fl_session, fl_participants, 
+    def add_fl_service(self, name, description, fl_session,
                        fl_aggregation, fl_communication, fl_security_privacy, fl_training):
         """
         Add a new FL service entry to the database.
@@ -212,7 +201,6 @@ class FLService():
         :param name: Name of the FL service.
         :param description: A short description of the FL service.
         :param fl_session: Dictionary containing session details.
-        :param fl_participants: Dictionary containing participant details.
         :param fl_aggregation: Dictionary defining the aggregation method.
         :param fl_communication: Dictionary defining the communication protocol.
         :param fl_security_privacy: Dictionary specifying security and privacy measures.
@@ -221,38 +209,35 @@ class FLService():
         """
 
         # Generate a unique ID for the new FL service entry
-        unique_id = max(self.db.all(), key=lambda x: x.doc_id).doc_id + 1 if self.db.all() else 1
         document = {
             "name": name,
             "description": description,
             "fl_session": fl_session,
-            "fl_participants": fl_participants,
             "fl_aggregation": fl_aggregation,
             "fl_communication": fl_communication,
-            "fl_security_privacy": fl_security_privacy,
+            "fl_security": fl_security_privacy,
             "fl_training": fl_training,
-            "doc_id": unique_id,
+            "doc_type": "fl_service",
             "timestamp": str(datetime.now().isoformat())
         }
 
         # Generate a unique model ID based on document content
-        model_id = self._create_hashed_id(document)
-        document["model_id"] = model_id
+        fl_service_id = self._create_hashed_id(document)
+        document["fl_service_id"] = fl_service_id
 
         # Validate the MLFlow model path before insertion
         
         logging.info(f"Adding the FL service: {document}")
-        logging.info(f"Unique ID: {unique_id}")
 
         # Insert the document into the database
-        if self.db.insert(table.Document(document, doc_id=unique_id)):
+        if self.fl_services.insert(document):
             return document
         else:
             logging.error("Failed to insert the FL service entry.")
             return False
         
     
-    def update_fl_sessoion(self, fl_service_id, name, description, ml_flow_model_path):
+    def update_fl_session(self, fl_service_id, name, description, ml_flow_model_path):
         """
         Update a new model to the database.
         :param model_id: Id of the model.
@@ -264,7 +249,7 @@ class FLService():
 
         Model = Query()
     
-        if self.db.update({'name': name, 'description': description, 
+        if self.fl_services.update({'name': name, 'description': description, 
                            'ml_flow_model_path': ml_flow_model_path, 'timestamp': str(datetime.now().isoformat())}, Model.fl_service_id ==fl_service_id):
             return self.get_model(fl_service_id)
         else:
@@ -276,18 +261,74 @@ class FLService():
         :param model_id: The ID of the model to retrieve.
         """
         Model = Query()
-        model = self.db.search(Model.fl_service_id == fl_service_id)
+        model = self.fl_services.search(Model.fl_service_id == fl_service_id)
         if model:
             return model
         else:
             return False
+        
+
+    def get_all_services(self):
+        """
+        Retrieve all documents in the table 'fl_services'.
+        """
+        logging.info("Retrieving all FL services from the database.")
+        services = self.fl_services.all()
+        return services if services else []
+
+    def get_service_summary(self):
+        """
+        Retrieve all documents from fl_services, resources, and policies tables joined by asset_id and resource_id.
+        """
+        logging.info("Retrieving service summary by joining fl_services, resources, and policies tables.")
+        Model = Query()
+        services = self.fl_services.all()
+        resources = self.db.table("resource").all()
+        policies = self.db.table("policies").all()
+
+        logging.debug(f"Retrieved {len(services)} services, {len(resources)} resources, and {len(policies)} policies from the database.")
+
+        # Create a dictionary of resources indexed by asset_id for quick lookup
+        resources_by_asset_id = {resource["asset_id"]: resource for resource in resources if "asset_id" in resource}
+        logging.debug(f"Created resources lookup dictionary with {len(resources_by_asset_id)} entries.")
+
+        # Create a dictionary of policies indexed by resource_id for quick lookup
+        policies_by_resource_id = {}
+        for policy in policies:
+            resource_id = policy.get("resource_id")
+            if resource_id:
+                if resource_id not in policies_by_resource_id:
+                    policies_by_resource_id[resource_id] = []
+                policies_by_resource_id[resource_id].append(policy)
+        logging.debug(f"Created policies lookup dictionary with {len(policies_by_resource_id)} entries.")
+
+        # Join services with resources and policies
+        joined_data = []
+        for service in services:
+            asset_id = service.get("fl_service_id")
+            if asset_id and asset_id in resources_by_asset_id:
+                resource = resources_by_asset_id[asset_id]
+                resource_id = resource.get("resource_id")
+                joined_entry = {**service, **resource}
+                joined_entry["policies"] = policies_by_resource_id.get(resource_id, [])
+                joined_data.append(joined_entry)
+                logging.debug(f"Joined service with asset_id {asset_id} to corresponding resource and policies.")
+            else:
+                if asset_id:
+                    logging.warning(f"No matching resource found for service with asset_id {asset_id}.")
+                else:
+                    logging.warning("Service does not have an asset_id.")
+
+        logging.info(f"Returning {len(joined_data)} joined entries.")
+        return joined_data if joined_data else []
+        
 
     def query_models(self, search_criteria):
         """
         Query models based on a search criteria.
         :param search_criteria: A dictionary with field values to search for.
         """
-        results = self.db.search(self.Model.matches(search_criteria))
+        results = self.fl_services.search(self.Model.matches(search_criteria))
         return results if results else "No models found matching the criteria."
     
     def get_mlflow_run_id(self, model_id):
@@ -336,28 +377,59 @@ class FLService():
         else:
             return False
         
-    def generate_semantics(self, model_id):
-        try:
-            mlflow.set_tracking_uri(settings.MLFLOW_URI)
-            semantic_manager = MlSemanticManager('data/cordsml.rdf')
-            
-            ml_flow_run_id = self.get_mlflow_run_id(model_id)
-            logging.info("run id retrieved :%s", ml_flow_run_id)
-            mflow_tags = extract_mlflow_semantics(ml_flow_run_id)
-            logging.info("tags extracted from mlflow: %s", str(mflow_tags))
+    def generate_semantics(self, fl_service_id):
+        """Generate semantic description"""
 
-            mlflow_semantics_dictionary = convert_tags_to_dictionary(mflow_tags)
-            logging.info("semantic in a dictionary: %s ", str(mlflow_semantics_dictionary))
+        fl_semantic_manager = FlSemanticManager('data/cords_federated_learning.rdf')
 
-            semantic_graph = semantic_manager.create_model_semantics(mlflow_semantics_dictionary)
-            jsonld_output = semantic_manager.convert_to_json_ld()
-
-            jsonld_output = jsonld_output
-
-            return jsonld_output
-
-        except Exception as e:
-            logging.error("Error Occured During Semantic Generation %s",str(e))
-            return False
+        service = self.get_fl_service(fl_service_id)[0]
         
+        tags = self.__convert_json_to_cords_format(service)
+        logging.info(tags)
+        semantics_dictionary = convert_tags_to_dictionary([tags])
+        logging.info(semantics_dictionary)
+        semantics = fl_semantic_manager.create_fl_semantics(semantics_dictionary)
+        logging.info(semantics)
+        return semantics
+
+
+
+        
+    def __convert_json_to_cords_format(self, input_json):
+        mapping = {
+            "fl_session": "cords.FLSession",
+            "fl_aggregation": "cords.FLAggregation",
+            "fl_communication": "cords.FLCommunication",
+            "fl_security": "cords.FLSecurity",
+            "fl_training": "cords.FLTraining"
+        }
+        
+        key_mapping = {
+            "session_id": "sessionID",
+            "session_start_time": "sessionStartTime",
+            "session_end_time": "sessionEndTime",
+            "num_min_clients": "numMinClients",
+            "num_max_clients": "numMaxClients",
+            "participation_ratio": "participationRatio",
+            "aggregation_method": "aggregationAlgorithm",
+            "aggregation_frequency": "aggregationFrequency",
+            "communication_protocol": "communicationProtocol",
+            "secure_aggregation_enabled": "secureAggregationEnabled",
+            "differential_privacy_enabled": "differentialPrivacyEnabled",
+            "encryption_method": "encryptionMethod",
+            "training_rounds": "trainingRounds",
+            "local_epochs": "localEpochs",
+            "loss_function": "lossFunction"
+        }
+        
+        transformed_data = {}
+        
+        for key, value in input_json.items():
+            if key in mapping:  # Handle nested structures
+                prefix = mapping[key]
+                for sub_key, sub_value in value.items():
+                    if sub_key in key_mapping:
+                        transformed_data[f"{prefix}.{key_mapping[sub_key]}"] = sub_value
+            
+        return transformed_data
  

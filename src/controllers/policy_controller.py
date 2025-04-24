@@ -25,7 +25,7 @@ new_policy = PolicyModel()
 
 
 @policy_blueprint.route('/add_policy', methods = ["POST"])
-@authenticate(token_auth)
+#@authenticate(token_auth)
 @body(PolicyPayload)
 def add_policy(kwargs):
     """Add a new policy and link it to a resource"""
@@ -60,10 +60,10 @@ def add_policy(kwargs):
 @policy_blueprint.route('/get_policies/<string:resource_id>', methods = ["GET"])
 # @response(MLModelSchemaResponse)
 # @other_responses({404: 'Entry not found'})
-@authenticate(token_auth)
+#@authenticate(token_auth)
 def get_policy(resource_id):
     """Return list of policies linked to the resource"""
-
+    new_policy = PolicyModel()
     policy_response = new_policy.get_policy(resource_id)
 
     if policy_response:
@@ -76,10 +76,10 @@ def get_policy(resource_id):
 @policy_blueprint.route('/remove_policy/<string:policy_id>', methods = ["DELETE"])
 # @response(MLModelSchemaResponse)
 # @other_responses({404: 'Entry not found'})
-@authenticate(token_auth)
+#@authenticate(token_auth)
 def remove_policy(policy_id):
     """remove a policy linked to the resource"""
-
+    new_policy = PolicyModel()
     policy_response = new_policy.remove_policy(policy_id)
 
     if policy_response:

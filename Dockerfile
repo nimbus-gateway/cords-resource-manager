@@ -16,11 +16,14 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy the local tar.gz library into the container
 COPY ./data/cords_semantics-0.2.1.tar.gz /app/
 
+COPY ./policies /app/policies
+
 # Install the local tar.gz library
 RUN pip install /app/cords_semantics-0.2.1.tar.gz
 
 # Copy the rest of the application code into the container
 COPY . /app/
+
 
 # Ensure the database folder exists
 # RUN mkdir -p /app/db

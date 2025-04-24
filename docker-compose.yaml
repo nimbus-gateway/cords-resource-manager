@@ -19,7 +19,7 @@ services:
       - local
 
   cords-resource-manager:
-    image: cords_resource_manager:latest
+    image: tharindupr/cords-docker-images:resource_manager
     container_name: resource_manager
     ports:
       - "5000:5000"

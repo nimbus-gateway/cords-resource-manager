@@ -1,0 +1,74 @@
+{
+  "@type": "ids:ContractOffer",
+  "@id": "https://w3id.org/idsa/autogen/contractOffer/bdf785b1-d159-4cd8-a21f-1e0104918c20",
+  "ids:permission": [
+    {
+      "@type": "ids:Permission",
+      "@id": "https://w3id.org/idsa/autogen/permission/ff34445e-d353-4b94-b94d-91cd74b1ad3f",
+      "ids:target": {
+        "@id": "http://w3id.org/engrd/connector/artifact/1"
+      },
+      "ids:description": [],
+      "ids:title": [],
+      "ids:action": [
+        {
+          "@id": "https://w3id.org/idsa/code/USE"
+        }
+      ],
+      "ids:assignee": [
+        {
+          "@id": "https://assignee.com"
+        }
+      ],
+      "ids:assigner": [
+        {
+          "@id": "https://assigner.com"
+        }
+      ],
+      "ids:preDuty": [],
+      "ids:postDuty": [],
+      "ids:constraint": [
+        {
+          "@type": "ids:Constraint",
+          "@id": "https://w3id.org/idsa/autogen/constraint/dca0997c-bbca-4fb8-bf85-667c913c5c73",
+          "ids:rightOperand": {
+            "@value": "2022-02-07T13:28:48Z",
+            "@type": "xsd:datetime"
+          },
+          "ids:leftOperand": {
+            "@id": "https://w3id.org/idsa/code/POLICY_EVALUATION_TIME"
+          },
+          "ids:operator": {
+            "@id": "https://w3id.org/idsa/code/AFTER"
+          }
+        },
+        {
+          "@type": "ids:Constraint",
+          "@id": "https://w3id.org/idsa/autogen/constraint/5a73ad9c-97b2-49b1-9f82-81be5456ec26",
+          "ids:rightOperand": {
+            "@value": "2022-03-14T13:28:48Z",
+            "@type": "xsd:datetime"
+          },
+          "ids:leftOperand": {
+            "@id": "https://w3id.org/idsa/code/POLICY_EVALUATION_TIME"
+          },
+          "ids:operator": {
+            "@id": "https://w3id.org/idsa/code/BEFORE"
+          }
+        }
+      ]
+    }
+  ],
+  "ids:provider": {
+    "@id": "https://provider.com"
+  },
+  "ids:contractDate": {
+    "@value": "2022-02-14T14:28:48.898+01:00",
+    "@type": "http://www.w3.org/2001/XMLSchema#dateTimeStamp"
+  },
+  "ids:obligation": [],
+  "ids:prohibition": [],
+  "ids:consumer": {
+    "@id": "https://consumer.com"
+  }
+}

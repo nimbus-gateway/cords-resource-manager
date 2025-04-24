@@ -132,3 +132,50 @@ def create_resource_description(kwargs, resource_id):
         error = {"status": "failed", "message": "Error occurred", "error": str(e)}
         logging.error("Error occurred %s", error)
         return jsonify(error), 500
+    
+
+
+import base64
+import urllib3
+import requests
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
+@ds_connector.route('/fetch_self_description', methods=["GET"])
+def fetch_self_description():
+    """Fetch self-description from an external API"""
+    try:
+        # Define the URL and credentials
+        self_description_url = "https://localhost:8090/api/selfDescription/"
+        username = "apiUser"
+        password = "password"
+
+        # Encode the credentials for Basic Auth
+        credentials = f"{username}:{password}"
+        encoded_credentials = base64.b64encode(credentials.encode()).decode()
+
+        # Set up headers
+        headers = {
+            "Authorization": f"Basic {encoded_credentials}",
+            "Content-Type": "application/json",
+        }
+
+        # Disable warnings for self-signed certificates (development only)
+        import urllib3
+        urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
+        # Make the GET request with SSL verification disabled
+        response = requests.get(self_description_url, headers=headers, verify=False)
+
+        # Check if the response is successful
+        if response.status_code != 200:
+            error_message = f"Failed to fetch self-description: {response.reason}"
+            logging.error(error_message)
+            return jsonify({"status": "failed", "message": error_message}), response.status_code
+
+        # Return the JSON response
+        return jsonify(response.json()), 200
+
+    except Exception as e:
+        error_message = f"Error fetching self-description: {str(e)}"
+        logging.error(error_message)
+        return jsonify({"status": "failed", "message": error_message}), 500
