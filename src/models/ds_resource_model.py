@@ -293,11 +293,11 @@ class DataSpaceResource():
             type_of_the_asset = found[0]['type'] 
 
             if type_of_the_asset == 'model':
-                logging.debug("Generating the sematnics for model %s", asset_id)
+                logging.debug("Generating the semantics for model %s", asset_id)
                 semantics = model.generate_semantics(asset_id)
             
             elif type_of_the_asset == 'fl_service':
-                logging.debug("Generating the sematnics for fl service %s", asset_id)
+                logging.debug("Generating the semantics for fl service %s", asset_id)
                 semantics = fl_service.generate_semantics(asset_id)
             
             

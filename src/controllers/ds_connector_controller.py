@@ -135,6 +135,8 @@ def create_resource_description(kwargs, resource_id):
     
 
 
+
+## the function from the below line will deal with the Connectors
 import base64
 import urllib3
 import requests
@@ -177,5 +179,367 @@ def fetch_self_description():
 
     except Exception as e:
         error_message = f"Error fetching self-description: {str(e)}"
+        logging.error(error_message)
+        return jsonify({"status": "failed", "message": error_message}), 500
+
+@ds_connector.route('/post_offered_resource', methods=["POST"])
+def post_offered_resource():
+    """Post offered resource to an external API"""
+    try:
+        # Define the URL and credentials
+        offered_resource_url = "https://localhost:8090/api/offeredResource/"
+        username = "apiUser"
+        password = "password"
+
+        # Encode the credentials for Basic Auth
+        credentials = f"{username}:{password}"
+        encoded_credentials = base64.b64encode(credentials.encode()).decode()
+
+        # Get the JSON payload from the request
+        data = request.get_json()
+        if not data:
+            error_message = "No data provided in the request"
+            logging.error(error_message)
+            return jsonify({"status": "failed", "message": error_message}), 400
+
+        # Extract catalog attribute from the payload
+        catalog = data.get("catalog")
+        if not catalog:
+            error_message = "Catalog attribute is missing in the request payload"
+            logging.error(error_message)
+            return jsonify({"status": "failed", "message": error_message}), 400
+
+        # Set up headers
+        headers = {
+            "Authorization": f"Basic {encoded_credentials}",
+            "Content-Type": "application/json",
+            "catalog": catalog,  # Add catalog as a header
+        }
+
+        payload = data.get("resource_description")
+
+        # Make the POST request with SSL verification disabled
+        response = requests.post(offered_resource_url, headers=headers, json=payload, verify=False)
+
+        # Check if the response is successful
+        if response.status_code != 200:
+            error_message = f"Failed to post offered resource: {response.reason}"
+            logging.error(error_message)
+            return jsonify({"status": "failed", "message": error_message}), response.status_code
+
+        # Return the JSON response
+        return jsonify(response.json()), 200
+
+    except Exception as e:
+        error_message = f"Error posting offered resource: {str(e)}"
+        logging.error(error_message)
+        return jsonify({"status": "failed", "message": error_message}), 500
+
+
+@ds_connector.route('/update_broker', methods=["POST"])
+def update_broker():
+    """Update broker by sending a POST request to the proxy"""
+    try:
+        # Define the URL and credentials
+        broker_update_url = "https://localhost:8184/proxy"
+        username = "idsUser"
+        password = "password"
+
+        # Encode the credentials for Basic Auth
+        credentials = f"{username}:{password}"
+        encoded_credentials = base64.b64encode(credentials.encode()).decode()
+
+        # Define the payload
+        payload = {
+            "multipart": "form",
+            "Forward-To": "https://broker-reverseproxy/infrastructure",
+            "messageType": "ConnectorUpdateMessage"
+        }
+
+        # Set up headers
+        headers = {
+            "Authorization": f"Basic {encoded_credentials}",
+            "Content-Type": "application/json",
+        }
+
+        # Make the POST request with SSL verification disabled
+        response = requests.post(broker_update_url, headers=headers, json=payload, verify=False)
+
+        # Check if the response is successful
+        if response.status_code != 200:
+            error_message = f"Failed to update broker: {response.reason}"
+            logging.error(error_message)
+            return jsonify({"status": "failed", "message": error_message}), response.status_code
+
+        # Return the JSON response
+        
+        return jsonify({"status": "success", "message": "Broker updated successfully"}), 200
+
+    except Exception as e:
+        error_message = f"Error updating broker: {str(e)}"
+        logging.error(error_message)
+        return jsonify({"status": "failed", "message": error_message}), 500
+    
+
+@ds_connector.route('/resource_description_request', methods=["POST"])
+def resource_description_request():
+    """Send a resource description request to an external API"""
+    try:
+        # Define the URL and credentials
+        description_request_url = "https://localhost:8184/proxy"
+        username = "idsUser"
+        password = "password"
+
+        # Encode the credentials for Basic Auth
+        credentials = f"{username}:{password}"
+        encoded_credentials = base64.b64encode(credentials.encode()).decode()
+
+        # Get the JSON payload from the request
+        data = request.get_json()
+        if not data:
+            error_message = "No data provided in the request"
+            logging.error(error_message)
+            return jsonify({"status": "failed", "message": error_message}), 400
+
+        # Extract requestedElement from the payload
+        requested_element = data.get("requestedElement")
+        if not requested_element:
+            error_message = "requestedElement attribute is missing in the request payload"
+            logging.error(error_message)
+            return jsonify({"status": "failed", "message": error_message}), 400
+
+        # Define the payload to send
+        payload = {
+            "multipart": "form",
+            "Forward-To": "https://ecc-provider:8889/data",
+            "messageType": "DescriptionRequestMessage",
+            "requestedElement": requested_element
+        }
+
+        # Set up headers
+        headers = {
+            "Authorization": f"Basic {encoded_credentials}",
+            "Content-Type": "application/json",
+        }
+
+        # Make the POST request with SSL verification disabled
+        response = requests.post(description_request_url, headers=headers, json=payload, verify=False)
+
+        # Check if the response is successful
+        if response.status_code != 200:
+            error_message = f"Failed to send resource description request: {response.reason}"
+            logging.error(error_message)
+            return jsonify({"status": "failed", "message": error_message}), response.status_code
+
+        # Return the JSON response
+        return jsonify(response.json()), 200
+
+    except Exception as e:
+        error_message = f"Error sending resource description request: {str(e)}"
+        logging.error(error_message)
+        return jsonify({"status": "failed", "message": error_message}), 500
+    
+
+
+@ds_connector.route('/contract_request_message', methods=["POST"])
+def contract_request_message():
+    """Send a contract request message to an external API"""
+    try:
+        # Define the URL and credentials
+        contract_request_url = "https://localhost:8184/proxy"
+        username = "idsUser"
+        password = "password"
+
+        # Encode the credentials for Basic Auth
+        credentials = f"{username}:{password}"
+        encoded_credentials = base64.b64encode(credentials.encode()).decode()
+
+        # Get the JSON payload from the request
+        data = request.get_json()
+        if not data:
+            error_message = "No data provided in the request"
+            logging.error(error_message)
+            return jsonify({"status": "failed", "message": error_message}), 400
+
+        # Extract required fields from the payload
+        contract_artifact = data.get("contract_artifact")
+        contract_id = data.get("contract_id")
+        contract_permission = data.get("contract_permission")
+        contract_provider = data.get("contract_provider")
+
+        # Validate required fields
+        if not all([contract_artifact, contract_id, contract_permission, contract_provider]):
+            error_message = "Missing required fields in the request payload"
+            logging.error(error_message)
+            return jsonify({"status": "failed", "message": error_message}), 400
+
+        # Build the payload
+        payload = {
+            "multipart": "form",
+            "Forward-To": "https://ecc-provider:8889/data",
+            "messageType": "ContractRequestMessage",
+            "requestedElement": contract_artifact,
+            "payload": {
+                "@context": {
+                    "ids": "https://w3id.org/idsa/core/",
+                    "idsc": "https://w3id.org/idsa/code/"
+                },
+                "@type": "ids:ContractRequest",
+                "@id": contract_id,
+                "ids:permission": contract_permission if isinstance(contract_permission, list) else [contract_permission],
+                "ids:provider": {
+                    "@id": contract_provider
+                },
+                "ids:obligation": [],
+                "ids:prohibition": [],
+                "ids:consumer": {
+                    "@id": "http://w3id.org/engrd/connector/consumer"
+                }
+            }
+        }
+
+        # Set up headers
+        headers = {
+            "Authorization": f"Basic {encoded_credentials}",
+            "Content-Type": "application/json",
+        }
+
+        # Make the POST request with SSL verification disabled
+        response = requests.post(contract_request_url, headers=headers, json=payload, verify=False)
+
+        # Check if the response is successful
+        if response.status_code != 200:
+            error_message = f"Failed to send contract request message: {response.reason}"
+            logging.error(error_message)
+            return jsonify({"status": "failed", "message": error_message}), response.status_code
+
+        # Return the JSON response
+        return jsonify(response.json()), 200
+
+    except Exception as e:
+        error_message = f"Error sending contract request message: {str(e)}"
+        logging.error(error_message)
+        return jsonify({"status": "failed", "message": error_message}), 500
+    
+
+
+@ds_connector.route('/contract_agreement_message', methods=["POST"])
+def contract_agreement_message():
+    """Send a contract agreement message to an external API"""
+    try:
+        contract_agreement_url = "https://localhost:8184/proxy"
+        username = "idsUser"
+        password = "password"
+
+        credentials = f"{username}:{password}"
+        encoded_credentials = base64.b64encode(credentials.encode()).decode()
+
+        data = request.get_json()
+        if not data:
+            error_message = "No data provided in the request"
+            logging.error(error_message)
+            return jsonify({"status": "failed", "message": error_message}), 400
+
+
+        contract_artifact = data.get("contract_artifact")
+        contract_agreement = data.get("contract_agreement")
+
+        if not all([contract_artifact, contract_agreement]):
+            error_message = "Missing required fields in the request payload"
+            logging.error(error_message)
+            return jsonify({"status": "failed", "message": error_message}), 400
+
+        payload = {
+            "multipart": "form",
+            "Forward-To": "https://ecc-provider:8889/data",
+            "messageType": "ContractAgreementMessage",
+            "requestedArtifact": contract_artifact,
+            "payload": contract_agreement
+        }
+
+        headers = {
+            "Authorization": f"Basic {encoded_credentials}",
+            "Content-Type": "text/plain",
+        }
+        
+        logging.info("Contract agreement payload: %s", payload)
+
+        response = requests.post(contract_agreement_url, headers=headers, json=payload, verify=False)
+
+        if response.status_code != 200:
+            error_message = f"Failed to send contract agreement message: {response.reason}"
+            logging.error(error_message)
+            return jsonify({"status": "failed", "message": error_message}), response.status_code
+
+        # Try to return JSON if possible, otherwise return raw text
+        try:
+            return jsonify(response.json()), 200
+        except ValueError:
+            return Response(response.text, status=200, mimetype=response.headers.get('Content-Type', 'text/plain'))
+
+    except Exception as e:
+        error_message = f"Error sending contract agreement message: {str(e)}"
+        logging.error(error_message)
+        return jsonify({"status": "failed", "message": error_message}), 500
+    
+
+
+@ds_connector.route('/artifact_request_message', methods=["POST"])
+def artifact_request_message():
+    """Send an artifact request message to an external API"""
+    try:
+        artifact_request_url = "https://localhost:8184/proxy"
+        username = "idsUser"
+        password = "password"
+
+        credentials = f"{username}:{password}"
+        encoded_credentials = base64.b64encode(credentials.encode()).decode()
+
+        data = request.get_json()
+        if not data:
+            error_message = "No data provided in the request"
+            logging.error(error_message)
+            return jsonify({"status": "failed", "message": error_message}), 400
+
+
+        contract_artifact = data.get("contract_artifact")
+        transfer_contract = data.get("transfer_contract")
+        payload = data.get("payload", "")
+
+        if not all([contract_artifact, transfer_contract]):
+            error_message = "Missing required fields in the request payload"
+            logging.error(error_message)
+            return jsonify({"status": "failed", "message": error_message}), 400
+
+        payload = {
+            "multipart": "form",
+            "Forward-To": "https://ecc-provider:8889/data",
+            "messageType": "ArtifactRequestMessage",
+            "requestedArtifact": contract_artifact,
+            "transferContract": transfer_contract,
+            "payload": payload
+        }
+
+        logging.info("Artifact request payload: %s", payload)
+
+        headers = {
+            "Authorization": f"Basic {encoded_credentials}",
+            "Content-Type": "application/json",
+        }
+
+        response = requests.post(artifact_request_url, headers=headers, json=payload, verify=False)
+
+        if response.status_code != 200:
+            error_message = f"Failed to send artifact request message: {response.reason}"
+            logging.error(error_message)
+            return jsonify({"status": "failed", "message": error_message}), response.status_code
+
+        try:
+            return jsonify(response.json()), 200
+        except ValueError:
+            return Response(response.text, status=200, mimetype=response.headers.get('Content-Type', 'text/plain'))
+
+    except Exception as e:
+        error_message = f"Error sending artifact request message: {str(e)}"
         logging.error(error_message)
         return jsonify({"status": "failed", "message": error_message}), 500

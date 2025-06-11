@@ -5,7 +5,6 @@ from apifairy import body, other_responses, response, authenticate
 from cords_semantics.semantics import FlSemanticManager
 from cords_semantics.mlflow import convert_tags_to_dictionary, extract_mlflow_semantics
 from src import basic_auth, token_auth
-import mlflow
 import logging
 from config import settings
 
@@ -190,7 +189,50 @@ def generate_semantics(fl_service_id):
         logging.error(e)
         return error, 500
 
-    
+
+@fl_services.route('/update_published_status/<string:fl_service_id>', methods=["POST"])
+# @authenticate(token_auth)
+@other_responses({400: error_response_schema, 404: error_response_schema})
+def update_published_status(fl_service_id):
+    """Update the published status of an FL service"""
+    try:
+        published = True
+
+        # Call the service function to update the published status
+        resp = fl_service.update_published_status(fl_service_id, published)
+
+        if resp:
+            return {"status": "success", "message": f"Published status updated for service ID {fl_service_id}"}, 200
+        else:
+            error = {"status": "failed", "message": "FL Service not found", "error": f"Service ID {fl_service_id} not found"}
+            return error, 404
+
+    except Exception as e:
+        logging.error(str(e))
+        error = {"status": "failed", "message": "Error Occurred", "error": str(e)}
+        return error, 500
+
+
+@fl_services.route('/remove/<string:fl_service_id>', methods=["DELETE"])
+# @authenticate(token_auth)
+@other_responses({404: error_response_schema})
+def remove_service(fl_service_id):
+    """Remove an FL service entry by its ID"""
+    try:
+        # Call the service function to remove the FL service
+        result = fl_service.remove_fl_service(fl_service_id)
+
+        if result:
+            return {"status": "success", "message": f"FL service with ID {fl_service_id} removed successfully."}, 200
+        else:
+            error = {"status": "failed", "message": "FL Service not found", "error": f"Service ID {fl_service_id} not found"}
+            return error, 404
+
+    except Exception as e:
+        logging.error(str(e))
+        error = {"status": "failed", "message": "Error Occurred", "error": str(e)}
+        return error, 500
+
 #         mlflow.set_tracking_uri(settings.MLFLOW_URI)
 #         semantic_manager = MlSemanticManager('data/cordsml.rdf')
         
@@ -255,3 +297,5 @@ def convert_json_to_cords_format(input_json):
                     transformed_data[f"{prefix}.{key_mapping[sub_key]}"] = sub_value
         
     return transformed_data
+
+

@@ -116,7 +116,7 @@ class TrueConnector:
         """
         try:
             template = self.create_resource_description_template()
-            _id = "https://w3id.org/idsa/autogen/dataResource/cords_{0}".format(str(uuid.uuid4()))
+            _id = "https://w3id.org/idsa/autogen/dataResource/{0}".format(resource_id)
             created = datetime.now(timezone.utc)
 
             formatted_datetime = created.isoformat(timespec='milliseconds').replace("+00:00", "Z")
@@ -144,9 +144,9 @@ class TrueConnector:
 
                 template["ids:keyword"].append(keyword_temp)
 
-            template["ids:representation"][0]["@id"] = "https://w3id.org/idsa/autogen/dataRepresentation/cords_{0}".format(resource_id)
-            template["ids:representation"][0]["ids:instance"][0]["@id"] = "http://w3id.org/engrd/connector/artifact/{0}".format(resource_id)
-            template["ids:contractOffer"][0]["ids:permission"][0]["ids:target"]["@id"] = "http://w3id.org/engrd/connector/artifact/{0}".format(resource_id)
+            template["ids:representation"][0]["@id"] = "https://w3id.org/idsa/autogen/dataRepresentation/{0}".format(resource_id)
+            template["ids:representation"][0]["ids:instance"][0]["@id"] = "https://w3id.org/idsa/autogen/artifact/{0}".format(resource_id)
+            template["ids:contractOffer"][0]["ids:permission"][0]["ids:target"]["@id"] = _id
             template["ids:contractOffer"][0]["ids:permission"][0]["@id"] = "hellloooo"
             
 

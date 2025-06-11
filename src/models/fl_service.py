@@ -218,6 +218,7 @@ class FLService():
             "fl_security": fl_security_privacy,
             "fl_training": fl_training,
             "doc_type": "fl_service",
+            "publised": False,
             "timestamp": str(datetime.now().isoformat())
         }
 
@@ -235,7 +236,20 @@ class FLService():
         else:
             logging.error("Failed to insert the FL service entry.")
             return False
-        
+
+    def update_published_status(self, fl_service_id, published_status):
+        """
+        Update the "published" status of an FL service by its ID.
+        :param fl_service_id: The ID of the FL service to update.
+        :param published_status: The new published status (True/False).
+        :return: The updated document if successful, False otherwise.
+        """
+        Model = Query()
+        if self.fl_services.update({'publised': published_status, 'timestamp': str(datetime.now().isoformat())}, Model.fl_service_id == fl_service_id):
+            return self.get_fl_service(fl_service_id)
+        else:
+            logging.error(f"Failed to update the published status for FL service with ID {fl_service_id}.")
+            return False
     
     def update_fl_session(self, fl_service_id, name, description, ml_flow_model_path):
         """
@@ -253,6 +267,21 @@ class FLService():
                            'ml_flow_model_path': ml_flow_model_path, 'timestamp': str(datetime.now().isoformat())}, Model.fl_service_id ==fl_service_id):
             return self.get_model(fl_service_id)
         else:
+            return False
+        
+    def remove_fl_service(self, fl_service_id):
+        """
+        Remove an FL service entry by its ID.
+        :param fl_service_id: The ID of the FL service to remove.
+        :return: True if the service was removed, False otherwise.
+        """
+        Model = Query()
+        result = self.fl_services.remove(Model.fl_service_id == fl_service_id)
+        if result:
+            logging.info(f"FL service with ID {fl_service_id} removed successfully.")
+            return True
+        else:
+            logging.warning(f"Failed to remove FL service with ID {fl_service_id}.")
             return False
 
     def get_fl_service(self, fl_service_id):
