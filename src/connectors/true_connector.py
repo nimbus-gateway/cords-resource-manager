@@ -146,8 +146,11 @@ class TrueConnector:
 
             template["ids:representation"][0]["@id"] = "https://w3id.org/idsa/autogen/dataRepresentation/{0}".format(resource_id)
             template["ids:representation"][0]["ids:instance"][0]["@id"] = "https://w3id.org/idsa/autogen/artifact/{0}".format(resource_id)
-            template["ids:contractOffer"][0]["ids:permission"][0]["ids:target"]["@id"] = _id
-            template["ids:contractOffer"][0]["ids:permission"][0]["@id"] = "hellloooo"
+            template["ids:contractOffer"][0]["ids:permission"][0]["ids:target"]["@id"] = "http://w3id.org/engrd/connector/artifact/cords/{0}".format(resource_id)
+            template["ids:contractOffer"][0]["ids:permission"][0]["@id"] = "https://w3id.org/idsa/autogen/permission/{0}".format(resource_id)
+            template["ids:contractOffer"][0]["ids:contractStart"]["@value"] = formatted_datetime
+            template["ids:contractOffer"][0]["ids:contractDate"]["@value"] = formatted_datetime
+
             
 
 
@@ -180,7 +183,7 @@ class TrueConnector:
         current_template["ids:contractOffer"][0]["@id"] = "https://w3id.org/idsa/autogen/contractOffer/{0}".format(uuid.uuid4())
 
         logging.info("Permissions: " + str(permissions))
-        current_template["ids:contractOffer"][0]["ids:permission"] = []
+        # current_template["ids:contractOffer"][0]["ids:permission"] = []
 
 
         if len(permissions) > 0:

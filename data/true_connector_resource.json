@@ -12,8 +12,7 @@
         }
     ],
     "ids:version": "1.0.0",
-    "ids:keyword": [
-    ],
+    "ids:keyword": [],
     "ids:contentType": {
         "@id": "https://w3id.org/idsa/code/SCHEMA_DEFINITION"
     },
@@ -52,7 +51,7 @@
                     ],
                     "ids:title": [
                         {
-                            "@value": "Example Usage Policy POSTMAN",
+                            "@value": "Access for the resource",
                             "@type": "http://www.w3.org/2001/XMLSchema#string"
                         }
                     ]

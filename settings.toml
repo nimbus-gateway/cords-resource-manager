@@ -13,5 +13,9 @@ TRUE_CONNECTOR_API_USER_NAME = "apiUser"
 TRUE_CONNECTOR_API_PASSWORD = "password"
 
 
-MLFLOW_URI = "http://127.0.0.1:4000"
+MLFLOW_URI = "http://127.0.0.1:3000"
 MLFLOW_ARTIFACT_PATH= "/vagrant/mlflow/mlartifacts"
+
+
+ORCHESTRATOR_URI = "http://127.0.0.1:4840"
+

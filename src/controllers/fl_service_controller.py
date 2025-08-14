@@ -28,9 +28,6 @@ fl_service = FLService()
 
 @fl_services.route('/add', methods = ["POST"])
 # @authenticate(token_auth)
-@response(fl_service_response_schema, 201)
-@other_responses({400: error_response_schema})
-@body(fl_service_schema)
 def add_service(kwargs):
     """Add a new FL service entry"""
     print(kwargs)
@@ -82,8 +79,6 @@ def add_service(kwargs):
 
 @fl_services.route('/get/<string:fl_service_id>', methods=["GET"])
 # @authenticate(token_auth)
-@response(fl_service_response_schema, 200)
-@other_responses({404: error_response_schema})
 def get_service(fl_service_id):
     """Retrieve an FL service entry by its ID"""
     try:
@@ -119,9 +114,6 @@ def list_services():
 
 @fl_services.route('/update/<string:fl_service_id>', methods=["PUT"])
 #@authenticate(token_auth)
-@response(fl_service_response_schema, 200)
-@other_responses({400: error_response_schema, 404: error_response_schema})
-@body(fl_service_schema)
 def update_service(fl_service_id, kwargs):
     """Update an existing FL service entry"""
     try:

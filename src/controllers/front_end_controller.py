@@ -40,11 +40,12 @@ def add_service():
         fl_communication = data.get('fl_communication')
         fl_security = data.get('fl_security')
         fl_training = data.get('fl_training')
+        fl_client = data.get('fl_client')
         connector_id = data.get('connector_id')
 
         # Check for missing required fields
         required_fields = [name, description, fl_session,  
-                           fl_aggregation, fl_communication, fl_security, fl_training, connector_id]
+                           fl_aggregation, fl_communication, fl_security, fl_training, connector_id, fl_client]
         
         print("required fields")
         print(required_fields)
@@ -57,7 +58,7 @@ def add_service():
         resp = fl_service.add_fl_service(
             name, description, 
             fl_session, fl_aggregation, 
-            fl_communication, fl_security, fl_training
+            fl_communication, fl_security, fl_training, fl_client
         )
 
 
@@ -75,6 +76,7 @@ def add_service():
                 resp["message"] = "FL service and resource created successfully"
                 resp["error"] = None
                 resp["fl_service_id"] = fl_service_id
+                resp["fl_client"] = fl_client
                 resp["connector_id"] = connector_id
 
                 return resp, 201

@@ -12,6 +12,8 @@ from cords_semantics.mlflow import convert_tags_to_dictionary, extract_mlflow_se
 import mlflow
 import logging
 from config import settings
+import uuid
+
 
 logging.basicConfig(
     level=logging.DEBUG,
@@ -194,7 +196,7 @@ class FLService():
         self.Model = Query()
 
     def add_fl_service(self, name, description, fl_session,
-                       fl_aggregation, fl_communication, fl_security_privacy, fl_training):
+                       fl_aggregation, fl_communication, fl_security_privacy, fl_training, fl_client):
         """
         Add a new FL service entry to the database.
         
@@ -217,6 +219,7 @@ class FLService():
             "fl_communication": fl_communication,
             "fl_security": fl_security_privacy,
             "fl_training": fl_training,
+            "fl_client": fl_client,
             "doc_type": "fl_service",
             "publised": False,
             "timestamp": str(datetime.now().isoformat())
@@ -412,13 +415,26 @@ class FLService():
         fl_semantic_manager = FlSemanticManager('data/cords_federated_learning.rdf')
 
         service = self.get_fl_service(fl_service_id)[0]
-        
+        client_id = service["fl_client"]
         tags = self.__convert_json_to_cords_format(service)
-        logging.info(tags)
+        logging.info(f"Converted service JSON to CORDS format tags: {tags}")
+
         semantics_dictionary = convert_tags_to_dictionary([tags])
-        logging.info(semantics_dictionary)
+        logging.info(f"Converted tags to semantics dictionary: {semantics_dictionary}")
+
         semantics = fl_semantic_manager.create_fl_semantics(semantics_dictionary)
-        logging.info(semantics)
+
+        client_semantic = {
+            "@id": "{0}/api/clientapp/get_client_app/{1}".format(settings.ORCHESTRATOR_URI, client_id),
+            "@type": "fl:Client",
+            # "fl:client": {
+            #     "@type": "http://www.w3.org/2001/XMLSchema#string",
+            #     "@value": ""
+            # }
+        }  
+        semantics["cords:flmetadata"].append(client_semantic)
+        logging.info(f"Generated FL semantics: {semantics}")
+
         return semantics
 
 
