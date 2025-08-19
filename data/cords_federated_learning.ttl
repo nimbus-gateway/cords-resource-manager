@@ -1,0 +1,187 @@
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix fl: <http://www.example.org/fl#> .
+@prefix mls: <http://www.w3.org/ns/mls#> .
+@prefix dcat: <http://www.w3.org/ns/dcat#> .
+
+# Class Definitions
+fl:FLSession rdf:type owl:Class ;
+    rdfs:label "Federated Learning Session" ;
+    rdfs:comment "Represents a federated learning session." .
+
+fl:FLTrainingRound rdf:type owl:Class ;
+	rdfs:subClassOf mls:Run ;
+    rdfs:label "Federated Learning Training Round" ;
+    rdfs:comment "A single round of training in the federated learning process." .
+
+fl:FLTraining rdf:type owl:Class ;
+    rdfs:label "Federated Learning Training" ;
+    rdfs:comment "The training process in federated learning." .
+
+fl:FLParticipant rdf:type owl:Class ;
+    rdfs:label "Federated Learning Participant" ;
+    rdfs:comment "A set of servers/clients participating in the FL process." .
+
+fl:FLAggregation rdf:type owl:Class ;
+    rdfs:subClassOf mls:Algorithm ;
+    rdfs:label "Federated Learning Aggregation" ;
+    rdfs:comment "The aggregation process for local models." .
+
+fl:FLService rdf:type owl:Class ;
+    rdfs:subClassOf dcat:DataService ;
+    rdfs:label "Federated Learning Service" ;
+    rdfs:comment "Services offered in the federated learning system." .
+
+fl:FLSecurity rdf:type owl:Class ;
+    rdfs:label "Federated Learning Security" ;
+    rdfs:comment "Security mechanisms for federated learning." .
+
+fl:FLCommunications rdf:type owl:Class ;
+    rdfs:label "Federated Learning Communications" ;
+    rdfs:comment "Communication protocols used in federated learning." .
+
+fl:FLModel rdf:type owl:Class ;
+    rdfs:subClassOf mls:Model ;
+    rdfs:label "Federated Learning ML Model" ;
+    rdfs:comment "A model trained on a local client before aggregation or aggregrated global model." .
+
+
+# Object Properties
+fl:hasSecurity rdf:type owl:ObjectProperty ;
+    rdfs:domain fl:FLService ;
+    rdfs:range fl:FLSecurity ;
+    rdfs:label "has security" ;
+    rdfs:comment "FL Service has security components." .
+
+fl:hasTraining rdf:type owl:ObjectProperty ;
+    rdfs:domain fl:FLService ;
+    rdfs:range fl:FLTraining ;
+    rdfs:label "has training" ;
+    rdfs:comment "FL Service includes training components." .
+
+fl:usesCommunication rdf:type owl:ObjectProperty ;
+    rdfs:domain fl:FLService ;
+    rdfs:range fl:FLCommunications ;
+    rdfs:label "uses communication" ;
+    rdfs:comment "FL Service uses communication protocols." .
+
+fl:offersSession rdf:type owl:ObjectProperty ;
+    rdfs:domain fl:FLService ;
+    rdfs:range fl:FLSession ;
+    rdfs:label "offers session" ;
+    rdfs:comment "FL Service offers federated learning sessions." .
+
+fl:usesAggregation rdf:type owl:ObjectProperty ;
+    rdfs:domain fl:FLTraining ;
+    rdfs:range fl:FLAggregation ;
+    rdfs:label "uses aggregation" ;
+    rdfs:comment "FL Training uses FL Aggregation." .
+
+fl:hasParticipant rdf:type owl:ObjectProperty ;
+    rdfs:domain fl:FLSession ;
+    rdfs:range fl:FLParticipant ;
+    rdfs:label "has participant" ;
+    rdfs:comment "FL Session includes participants." .
+
+fl:hasTrainingRound rdf:type owl:ObjectProperty ;
+    rdfs:domain fl:FLSession ;
+    rdfs:range fl:FLTrainingRound ;
+    rdfs:label "has training round" ;
+    rdfs:comment "FL Session includes training rounds." .
+
+fl:producesModel rdf:type owl:ObjectProperty ;
+    rdfs:domain fl:FLTrainingRound ;
+    rdfs:range fl:FLModel ;
+    rdfs:label "produces model" ;
+    rdfs:comment "FL Training Round produces a FL Model." .
+
+	
+	
+	
+# Datatype Properties for FLParticipant
+fl:participantID rdf:type owl:DatatypeProperty ;
+    rdfs:domain fl:FLParticipant ;
+    rdfs:range xsd:string .
+
+fl:participantDeviceType rdf:type owl:DatatypeProperty ;
+    rdfs:domain fl:FLParticipant ;
+    rdfs:range xsd:string .
+
+fl:participantComputeCapacity rdf:type owl:DatatypeProperty ;
+    rdfs:domain fl:FLParticipant ;
+    rdfs:range xsd:float .
+
+# Datatype Properties for FLAggregation
+fl:aggregationAlgorithm rdf:type owl:DatatypeProperty ;
+    rdfs:domain fl:FLAggregation ;
+    rdfs:range xsd:string .
+
+fl:aggregationFrequency rdf:type owl:DatatypeProperty ;
+    rdfs:domain fl:FLAggregation ;
+    rdfs:range xsd:integer .
+
+# Datatype Properties for FLCommunications
+fl:communicationProtocol rdf:type owl:DatatypeProperty ;
+    rdfs:domain fl:FLCommunications ;
+    rdfs:range xsd:string .
+
+fl:secureAggregationEnabled rdf:type owl:DatatypeProperty ;
+    rdfs:domain fl:FLCommunications ;
+    rdfs:range xsd:boolean .
+
+# Datatype Properties for FLSecurity
+fl:differentialPrivacyEnabled rdf:type owl:DatatypeProperty ;
+    rdfs:domain fl:FLSecurity ;
+    rdfs:range xsd:boolean .
+
+fl:encryptionMethod rdf:type owl:DatatypeProperty ;
+    rdfs:domain fl:FLSecurity ;
+    rdfs:range xsd:string .
+
+# Datatype Properties for FLTraining
+fl:trainingRounds rdf:type owl:DatatypeProperty ;
+    rdfs:domain fl:FLTraining ;
+    rdfs:range xsd:integer .
+
+fl:localEpochs rdf:type owl:DatatypeProperty ;
+    rdfs:domain fl:FLTraining ;
+    rdfs:range xsd:integer .
+
+fl:lossFunction rdf:type owl:DatatypeProperty ;
+    rdfs:domain fl:FLTraining ;
+    rdfs:range xsd:string .
+
+# Datatype Properties for FLTrainingRound
+fl:roundID rdf:type owl:DatatypeProperty ;
+    rdfs:domain fl:FLTrainingRound ;
+    rdfs:range xsd:string .
+
+fl:roundStartTime rdf:type owl:DatatypeProperty ;
+    rdfs:domain fl:FLTrainingRound ;
+    rdfs:range xsd:dateTime .
+
+fl:roundEndTime rdf:type owl:DatatypeProperty ;
+    rdfs:domain fl:FLTrainingRound ;
+    rdfs:range xsd:dateTime .
+
+fl:numParticipatingClients rdf:type owl:DatatypeProperty ;
+    rdfs:domain fl:FLTrainingRound ;
+    rdfs:range xsd:integer .
+
+fl:globalModelVersion rdf:type owl:DatatypeProperty ;
+    rdfs:domain fl:FLTrainingRound ;
+    rdfs:range xsd:string .
+
+fl:droppedClients rdf:type owl:DatatypeProperty ;
+    rdfs:domain fl:FLTrainingRound ;
+    rdfs:range xsd:integer .
+
+fl:modelID rdf:type owl:DatatypeProperty ;
+    rdfs:domain fl:FLTrainingRound ;
+    rdfs:range xsd:string .
+
+fl:modelType rdf:type owl:DatatypeProperty ;
+    rdfs:domain fl:FLTrainingRound ;
+    rdfs:range xsd:string .

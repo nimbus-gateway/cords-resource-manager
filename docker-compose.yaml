@@ -27,6 +27,24 @@ services:
       - ./policies/:/app/policies
     environment:
       FLASK_APP: app.py
+      # Dynaconf environment variables from settings.toml
+      DYNACONF_DEBUG: "true"
+      DYNACONF_SECRET_KEY: "change_this_in_prod"
+      DYNACONF_HOST: "0.0.0.0"
+      DYNACONF_PORT: "4000"
+      DYNACONF_ENV: "development"
+      # True Connector configuration
+      DYNACONF_TRUE_CONNECTOR_TEMPLATE: "data/true_connector_resource.json"
+      DYNACONF_TRUE_CONNECTOR_PROXY_URL: "https://localhost:8184/proxy"
+      DYNACONF_TRUE_CONNECTOR_SD_URL: "https://172.17.0.1:8090"
+      DYNACONF_TRUE_CONNECTOR_BROKER_URL: "https://broker-reverseproxy/infrastructure"
+      DYNACONF_TRUE_CONNECTOR_API_USER_NAME: "apiUser"
+      DYNACONF_TRUE_CONNECTOR_API_PASSWORD: "password"
+      # MLflow configuration
+      DYNACONF_MLFLOW_URI: "http://127.0.0.1:3000"
+      DYNACONF_MLFLOW_ARTIFACT_PATH: "/vagrant/mlflow/mlartifacts"
+      # Orchestrator configuration
+      DYNACONF_ORCHESTRATOR_URI: "http://127.0.0.1:4840"
     networks:
       - local
       
